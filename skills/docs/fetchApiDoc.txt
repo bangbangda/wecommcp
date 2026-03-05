@@ -1,0 +1,19 @@
+curl 'https://developer.work.weixin.qq.com/docFetch/fetchCnt?lang=zh_CN&ajax=1&f=json&random=175356' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: zh-CN,zh;q=0.9' \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/x-www-form-urlencoded' \
+  -b 'wwrtx.c_gdpr=0; omgid=0_hR77hkxWW87D8; pgv_pvid=7cac920a2047c8a9; _qimei_q36=; _qimei_h38=bdb38a589553328f85a041e403000001819603; qq_domain_video_guid_verify=57df16e51717cfa6; _qimei_q32=; _qimei_i_2=4cca55dde20c; _qimei_i_1=5ed152d0c10853d39092f6395e8170e3f5e6f2f9170a0386b5da2c582593206c6163369d3980e4dcd594e2ee; pac_uid=0_SbCk1bHjT12xZ; _qimei_uuid42=1a1170b132a10019fc10cd2e2404307d1c5c4b4412; ww_lang=cn,zh; wwrtx.ref=direct; wwrtx.refid=41345954411342202; wwrtx.ltype=1; HMACCOUNT=D81FAE2660496E25; wwrtx.i18n_lan=zh; wwrtx.vst4=AQAAIotvJVOBTSnS8oT6Gnnn_PxXy8CFaQsMDYFj4tVySepgKWpx2LuCBDwPDVLTKTyfYazcm05X009kWfQiG-DsrAVmtZRFyNEy8gFQc-8r3MNfnkboNmlJZj2HQxGlyEwjk9ItdD5wsYR9MleO73L_kQnRVhzbPyYpAS-UKvzO9Rvh5TsAV4tOiwI7CKrE016flghb5HFJcNOMP-mX79rRkQ; _clck=185u3cw|1|g3v|0; Hm_lvt_b9a29d420538f7c51b95531dd135a21b=1770713116,1770779387,1771898713; Hm_lpvt_b9a29d420538f7c51b95531dd135a21b=1772094601; wwopen.open.sid=wLaVjewp9rZkJPPwQK0y9pxUsMecj_WUvdOSMue3IDnoIi7Hfq9rt4QxfQsIFALIZ_Ycw56rY0e-mMZwGFN3_Nw; wwrtx.vst=O0MVegwUJKAvAbxJFerk6HdqgKti2h5IJevnshuyXjTiPi7qKRc4aCPkHX_aWHSgEiXhyurWlaJeu9ZVth67DbutP2amFtRcRe9tC7N0WgMIDuG6pBR-b-6ujLyPWzAlWeqmj89MsY_ccskSALE_HF6brq9L7U-7evR8kcg2fNDDmI20_2Jg3c6yWUDHM5dhsqph-wzYEJaqhoB1DfByyOsAuF2CqvOYJrgk3H6WBrd8N4x_K24pYe9LXWqju1i962LsQFRwQNzWxZGk4QRMfdX6fw1vc0cUninLgOV9JPg; wwrtx.sid=LReQEi6x5P4AveRDiWJbEGSm-vEv5qsxKXuNojoY5GgoPFgjVSl8AMP7pkB-TcDyl5kzZ4e0uf08G3SixhzJPg; wwrtx.vid=1688857188799844; wxpay.corpid=1970326384012021; wxpay.vid=1688857188799844; wwrtx.cs_ind=; wwrtx.logined=true; wwapidoc.sid=9255C7B78E75F1B62568FE39DACB8DB0E7F2A36A63C94EE0E6B2924EC8564491BA48C544414FF8860FD891B8031049CB91E2701080A77743DC816604FC155BF5; wwapidoc.token_wt=eyJ0b2tlbiI6IkNtd0tCZ2dDRUFFWUFoSWdCay9NYmtTeTl1NFBNVjk5OGEwVmEvQ1NiYWpoZlVKU3VhVjVsSXdqZzhJYVFMMUdSdWcyS2dVbS9lUUtRemx1SmllVFlqNzBKYWMxR1hXMVN6UHE2RmFSUTJIdEEwVDNZSW1scGVXeFZpWnNwR1Y2WnY4QjREblBhb0xPeEZrN3h1RWlJZ29nQ08vUG1hc0JFTXpRQXhpQWdJQVFJZzkzZDIxdVozTmxjM05wYjI1emRuST0iLCJleHAiOjE3NzIxNjAyNTd9' \
+  -H 'dnt: 1' \
+  -H 'origin: https://developer.work.weixin.qq.com' \
+  -H 'pragma: no-cache' \
+  -H 'priority: u=1, i' \
+  -H 'referer: https://developer.work.weixin.qq.com/document/path/93647' \
+  -H 'sec-ch-ua: "Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36' \
+  --data-raw 'doc_id=26902'
