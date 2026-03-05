@@ -1,0 +1,2 @@
+# wecommcp
+wecom mcp service
