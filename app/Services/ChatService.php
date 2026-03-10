@@ -243,6 +243,11 @@ PROMPT;
             'get_schedule_detail' => '正在查询日程详情...',
             'cancel_schedule' => '正在取消日程...',
             'query_calendars' => '正在查询日历列表...',
+            'create_group_chat' => '正在创建群聊...',
+            'update_group_chat' => '正在修改群聊...',
+            'get_group_chat' => '正在获取群聊信息...',
+            'query_group_chats' => '正在查询群聊列表...',
+            'send_group_message' => '正在发送群消息...',
             default => '正在执行操作...',
         };
     }

@@ -3,6 +3,11 @@
 namespace App\Mcp;
 
 use App\Mcp\Tools\Contact\SearchContactsTool;
+use App\Mcp\Tools\GroupChat\CreateGroupChatTool;
+use App\Mcp\Tools\GroupChat\GetGroupChatTool;
+use App\Mcp\Tools\GroupChat\QueryGroupChatsTool;
+use App\Mcp\Tools\GroupChat\SendGroupMessageTool;
+use App\Mcp\Tools\GroupChat\UpdateGroupChatTool;
 use App\Mcp\Tools\Meeting\CancelMeetingTool;
 use App\Mcp\Tools\Meeting\CreateMeetingTool;
 use App\Mcp\Tools\Meeting\GetMeetingInfoTool;
@@ -47,6 +52,11 @@ class ToolRegistry
         'search_contacts' => null,
         'save_memory' => null,
         'delete_memory' => null,
+        'create_group_chat' => null,
+        'update_group_chat' => null,
+        'get_group_chat' => null,
+        'query_group_chats' => null,
+        'send_group_message' => null,
     ];
 
     /** @var array<int, class-string<\Laravel\Mcp\Server\Tool>> 注册的 Tool 类列表 */
@@ -69,6 +79,11 @@ class ToolRegistry
         GetScheduleDetailTool::class,
         CancelScheduleTool::class,
         QueryCalendarsTool::class,
+        CreateGroupChatTool::class,
+        UpdateGroupChatTool::class,
+        GetGroupChatTool::class,
+        QueryGroupChatsTool::class,
+        SendGroupMessageTool::class,
     ];
 
     /**

@@ -2,6 +2,11 @@
 
 use App\Mcp\ToolRegistry;
 use App\Mcp\Tools\Contact\SearchContactsTool;
+use App\Mcp\Tools\GroupChat\CreateGroupChatTool;
+use App\Mcp\Tools\GroupChat\GetGroupChatTool;
+use App\Mcp\Tools\GroupChat\QueryGroupChatsTool;
+use App\Mcp\Tools\GroupChat\SendGroupMessageTool;
+use App\Mcp\Tools\GroupChat\UpdateGroupChatTool;
 use App\Mcp\Tools\Meeting\CancelMeetingTool;
 use App\Mcp\Tools\Meeting\CreateMeetingTool;
 use App\Mcp\Tools\Meeting\GetMeetingInfoTool;
@@ -25,7 +30,7 @@ test('getToolClasses 返回所有注册的 Tool 类', function () {
 
     $classes = $registry->getToolClasses();
 
-    expect($classes)->toHaveCount(18)
+    expect($classes)->toHaveCount(23)
         ->toContain(CreateMeetingTool::class)
         ->toContain(CancelMeetingTool::class)
         ->toContain(UpdateMeetingTool::class)
@@ -43,7 +48,12 @@ test('getToolClasses 返回所有注册的 Tool 类', function () {
         ->toContain(QuerySchedulesTool::class)
         ->toContain(GetScheduleDetailTool::class)
         ->toContain(CancelScheduleTool::class)
-        ->toContain(QueryCalendarsTool::class);
+        ->toContain(QueryCalendarsTool::class)
+        ->toContain(CreateGroupChatTool::class)
+        ->toContain(UpdateGroupChatTool::class)
+        ->toContain(GetGroupChatTool::class)
+        ->toContain(QueryGroupChatsTool::class)
+        ->toContain(SendGroupMessageTool::class);
 });
 
 test('getToolMap 返回正确的 name → class 映射', function () {
@@ -51,7 +61,7 @@ test('getToolMap 返回正确的 name → class 映射', function () {
 
     $map = $registry->getToolMap();
 
-    expect($map)->toHaveCount(18)
+    expect($map)->toHaveCount(23)
         ->toHaveKey('create_meeting', CreateMeetingTool::class)
         ->toHaveKey('cancel_meeting', CancelMeetingTool::class)
         ->toHaveKey('update_meeting', UpdateMeetingTool::class)
@@ -69,7 +79,12 @@ test('getToolMap 返回正确的 name → class 映射', function () {
         ->toHaveKey('query_schedules', QuerySchedulesTool::class)
         ->toHaveKey('get_schedule_detail', GetScheduleDetailTool::class)
         ->toHaveKey('cancel_schedule', CancelScheduleTool::class)
-        ->toHaveKey('query_calendars', QueryCalendarsTool::class);
+        ->toHaveKey('query_calendars', QueryCalendarsTool::class)
+        ->toHaveKey('create_group_chat', CreateGroupChatTool::class)
+        ->toHaveKey('update_group_chat', UpdateGroupChatTool::class)
+        ->toHaveKey('get_group_chat', GetGroupChatTool::class)
+        ->toHaveKey('query_group_chats', QueryGroupChatsTool::class)
+        ->toHaveKey('send_group_message', SendGroupMessageTool::class);
 });
 
 test('getClaudeToolDefinitions 格式正确', function () {
@@ -77,7 +92,7 @@ test('getClaudeToolDefinitions 格式正确', function () {
 
     $definitions = $registry->getClaudeToolDefinitions();
 
-    expect($definitions)->toHaveCount(18);
+    expect($definitions)->toHaveCount(23);
 
     // 每个定义包含 name、description、input_schema
     foreach ($definitions as $def) {
@@ -116,6 +131,17 @@ test('getCapabilitiesSummary 包含所有 tool 描述', function () {
         ->toContain('10.')
         ->toContain('11.')
         ->toContain('12.')
+        ->toContain('13.')
+        ->toContain('14.')
+        ->toContain('15.')
+        ->toContain('16.')
+        ->toContain('17.')
+        ->toContain('18.')
+        ->toContain('19.')
+        ->toContain('20.')
+        ->toContain('21.')
+        ->toContain('22.')
+        ->toContain('23.')
         ->toContain('创建企业微信在线视频会议')
         ->toContain('修改企业微信会议的标题')
         ->toContain('取消企业微信会议')
@@ -128,5 +154,10 @@ test('getCapabilitiesSummary 包含所有 tool 描述', function () {
         ->toContain('查询企业微信会议室的预定信息')
         ->toContain('保存用户偏好或习惯到长期记忆')
         ->toContain('删除用户的一条长期记忆')
-        ->toContain('查询用户的日历列表');
+        ->toContain('查询用户的日历列表')
+        ->toContain('创建企业微信群聊')
+        ->toContain('修改企业微信群聊')
+        ->toContain('获取企业微信群聊的详细信息')
+        ->toContain('查询用户的群聊列表')
+        ->toContain('向企业微信群聊推送消息');
 });
