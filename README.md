@@ -17,15 +17,26 @@
 
 | 分类 | Tool | 说明 |
 |------|------|------|
-| 会议 | CreateMeetingTool | 创建在线会议 |
+| 会议 | CreateMeetingTool | 创建在线视频会议 |
 | | QueryMeetingsTool | 查询会议列表 |
 | | GetMeetingInfoTool | 获取会议详情 |
 | | UpdateMeetingTool | 修改会议 |
 | | CancelMeetingTool | 取消会议 |
+| 日程 | CreateCalendarTool | 创建日历（私人/公共/企业） |
+| | QueryCalendarsTool | 查询日历列表 |
+| | CreateScheduleTool | 创建日程，多日历时自动推荐 |
+| | QuerySchedulesTool | 查询日程列表 |
+| | GetScheduleDetailTool | 获取日程详情 |
+| | CancelScheduleTool | 取消日程 |
 | 会议室 | QueryMeetingRoomsTool | 查询会议室列表 |
 | | BookMeetingRoomTool | 预定会议室 |
 | | QueryRoomBookingsTool | 查询预定记录 |
 | | CancelRoomBookingTool | 取消预定 |
+| 群聊 | CreateGroupChatTool | 创建群聊 |
+| | UpdateGroupChatTool | 修改群聊（改名/换群主/增减成员） |
+| | GetGroupChatTool | 获取群聊详情 |
+| | QueryGroupChatsTool | 查询我创建/参与的群聊 |
+| | SendGroupMessageTool | 推送消息到群聊（支持 @成员） |
 | 联系人 | SearchContactsTool | 搜索联系人（拼音四级匹配） |
 | 记忆 | SaveMemoryTool | 保存用户偏好/习惯 |
 | | DeleteMemoryTool | 删除记忆 |
@@ -151,7 +162,7 @@ app/
 │   └── AiManager.php           # Laravel Manager 工厂
 ├── Mcp/
 │   ├── Servers/WecomServer.php # MCP Server 入口
-│   └── Tools/                  # 12 个 MCP Tool
+│   └── Tools/                  # 23 个 MCP Tool
 ├── Models/                     # Contact, RecentMeeting, UserMemory
 ├── Services/
 │   ├── ChatService.php         # AI 对话编排（tool 循环）
