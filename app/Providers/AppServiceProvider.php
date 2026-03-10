@@ -10,6 +10,7 @@ use App\Wecom\WecomManager;
 use App\Wecom\WecomMeetingClient;
 use App\Wecom\WecomMeetingRoomClient;
 use App\Wecom\WecomMessageClient;
+use App\Wecom\WecomScheduleClient;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -46,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(WecomMessageClient::class, fn ($app) => new WecomMessageClient(
             app: $app->make(WecomManager::class)->app('agent'),
             agentId: config('services.wecom.apps.agent.id'),
+        ));
+
+        $this->app->singleton(WecomScheduleClient::class, fn ($app) => new WecomScheduleClient(
+            app: $app->make(WecomManager::class)->app('agent'),
         ));
     }
 

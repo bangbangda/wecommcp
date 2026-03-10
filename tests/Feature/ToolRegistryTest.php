@@ -13,13 +13,19 @@ use App\Mcp\Tools\MeetingRoom\QueryMeetingRoomsTool;
 use App\Mcp\Tools\MeetingRoom\QueryRoomBookingsTool;
 use App\Mcp\Tools\Memory\DeleteMemoryTool;
 use App\Mcp\Tools\Memory\SaveMemoryTool;
+use App\Mcp\Tools\Schedule\CancelScheduleTool;
+use App\Mcp\Tools\Schedule\CreateCalendarTool;
+use App\Mcp\Tools\Schedule\CreateScheduleTool;
+use App\Mcp\Tools\Schedule\GetScheduleDetailTool;
+use App\Mcp\Tools\Schedule\QueryCalendarsTool;
+use App\Mcp\Tools\Schedule\QuerySchedulesTool;
 
 test('getToolClasses 返回所有注册的 Tool 类', function () {
     $registry = app(ToolRegistry::class);
 
     $classes = $registry->getToolClasses();
 
-    expect($classes)->toHaveCount(12)
+    expect($classes)->toHaveCount(18)
         ->toContain(CreateMeetingTool::class)
         ->toContain(CancelMeetingTool::class)
         ->toContain(UpdateMeetingTool::class)
@@ -31,7 +37,13 @@ test('getToolClasses 返回所有注册的 Tool 类', function () {
         ->toContain(CancelRoomBookingTool::class)
         ->toContain(QueryRoomBookingsTool::class)
         ->toContain(SaveMemoryTool::class)
-        ->toContain(DeleteMemoryTool::class);
+        ->toContain(DeleteMemoryTool::class)
+        ->toContain(CreateCalendarTool::class)
+        ->toContain(CreateScheduleTool::class)
+        ->toContain(QuerySchedulesTool::class)
+        ->toContain(GetScheduleDetailTool::class)
+        ->toContain(CancelScheduleTool::class)
+        ->toContain(QueryCalendarsTool::class);
 });
 
 test('getToolMap 返回正确的 name → class 映射', function () {
@@ -39,7 +51,7 @@ test('getToolMap 返回正确的 name → class 映射', function () {
 
     $map = $registry->getToolMap();
 
-    expect($map)->toHaveCount(12)
+    expect($map)->toHaveCount(18)
         ->toHaveKey('create_meeting', CreateMeetingTool::class)
         ->toHaveKey('cancel_meeting', CancelMeetingTool::class)
         ->toHaveKey('update_meeting', UpdateMeetingTool::class)
@@ -51,7 +63,13 @@ test('getToolMap 返回正确的 name → class 映射', function () {
         ->toHaveKey('cancel_room_booking', CancelRoomBookingTool::class)
         ->toHaveKey('query_room_bookings', QueryRoomBookingsTool::class)
         ->toHaveKey('save_memory', SaveMemoryTool::class)
-        ->toHaveKey('delete_memory', DeleteMemoryTool::class);
+        ->toHaveKey('delete_memory', DeleteMemoryTool::class)
+        ->toHaveKey('create_calendar', CreateCalendarTool::class)
+        ->toHaveKey('create_schedule', CreateScheduleTool::class)
+        ->toHaveKey('query_schedules', QuerySchedulesTool::class)
+        ->toHaveKey('get_schedule_detail', GetScheduleDetailTool::class)
+        ->toHaveKey('cancel_schedule', CancelScheduleTool::class)
+        ->toHaveKey('query_calendars', QueryCalendarsTool::class);
 });
 
 test('getClaudeToolDefinitions 格式正确', function () {
@@ -59,7 +77,7 @@ test('getClaudeToolDefinitions 格式正确', function () {
 
     $definitions = $registry->getClaudeToolDefinitions();
 
-    expect($definitions)->toHaveCount(12);
+    expect($definitions)->toHaveCount(18);
 
     // 每个定义包含 name、description、input_schema
     foreach ($definitions as $def) {
@@ -98,7 +116,7 @@ test('getCapabilitiesSummary 包含所有 tool 描述', function () {
         ->toContain('10.')
         ->toContain('11.')
         ->toContain('12.')
-        ->toContain('创建企业微信在线会议')
+        ->toContain('创建企业微信在线视频会议')
         ->toContain('修改企业微信会议的标题')
         ->toContain('取消企业微信会议')
         ->toContain('查询单个企业微信会议的完整详情')
@@ -109,5 +127,6 @@ test('getCapabilitiesSummary 包含所有 tool 描述', function () {
         ->toContain('取消企业微信会议室预定')
         ->toContain('查询企业微信会议室的预定信息')
         ->toContain('保存用户偏好或习惯到长期记忆')
-        ->toContain('删除用户的一条长期记忆');
+        ->toContain('删除用户的一条长期记忆')
+        ->toContain('查询用户的日历列表');
 });
