@@ -15,7 +15,12 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 
 #[Name('create_meeting')]
-#[Description('创建企业微信在线会议。当用户说"开个会""建个明天的会""约个视频会议"时使用此工具。参会人传入中文姓名即可，系统自动匹配为企微用户（支持同音字模糊匹配），匹配到多个候选时会返回 need_clarification 供确认。此工具仅用于创建新会议，修改或取消已有会议请使用其他工具。')]
+#[Description('创建企业微信在线视频会议（有会议链接，参会人通过链接加入线上会议）。
+当用户说"开个视频会""在线会议""线上开会""约个视频会议"时使用此工具。
+参会人传入中文姓名即可，系统自动匹配为企微用户（支持同音字模糊匹配），
+匹配到多个候选时会返回 need_clarification 供确认。
+此工具仅用于创建在线视频会议。如果用户想创建日程安排（如面试、线下会议、备忘提醒），
+应使用 create_schedule 而非此工具。修改或取消已有会议请使用其他工具。')]
 class CreateMeetingTool extends Tool
 {
     public function schema(JsonSchema $schema): array

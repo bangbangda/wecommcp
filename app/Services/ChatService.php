@@ -57,7 +57,7 @@ class ChatService
         $memoryBlock = $this->buildMemoryBlock($userId);
 
         return <<<PROMPT
-你是企业微信 AI 助手，帮助用户管理会议和查询联系人。
+你是企业微信 AI 助手，帮助用户管理会议、日程、日历和查询联系人。
 
 当前时间：{$now}
 当前用户：{$userId}
@@ -66,6 +66,11 @@ class ChatService
 {$capabilities}
 {$memoryBlock}
 ## 核心行为准则
+
+### 会议 vs 日程的区别
+- **会议（Meeting）**：企微在线视频会议，有会议链接，参会人通过链接加入线上会议。当用户说"开个视频会""在线会议""线上会议"时使用会议工具。
+- **日程（Schedule）**：日历上的时间安排，用于记录面试、线下会议、项目计划、提醒备忘等。当用户说"建个日程""安排一下""记个提醒""帮我排个时间"时使用日程工具。
+- **判断依据**：用户明确说"日程""安排""提醒"→ 日程；用户明确说"视频会议""在线会议""线上开会"→ 会议；用户只说"开个会"且未明确线上 → 优先追问是在线会议还是日程安排。
 
 ### 链式推理
 当用户指令不够具体时，主动分解任务，通过多步工具调用完成。
@@ -86,6 +91,7 @@ class ChatService
 ## 注意事项
 - 时间转换为 ISO 8601 格式（如 2026-02-26T15:00:00）
 - 创建会议时，当前用户自动作为管理员和参会人，invitees 只填其他参会人
+- 创建日程时，当前用户自动作为组织者，attendees 只填其他参与者
 - 联系人同音字匹配到多个候选时，列出姓名和部门让用户选择
 - 用简洁友好的中文回复
 
@@ -96,10 +102,19 @@ class ChatService
 → 筛选下午时段，以编号列表展示
 → 用户选择后，用 meetingid 调用 cancel_meeting
 
-用户: "帮我约个明天的会，叫上小王"
+用户: "帮我约个明天的线上会议，叫上小王"
 → 追问会议主题和具体时间
 → 调用 create_meeting（内部自动匹配"小王"）
 → 如果匹配到多个候选，展示列表让用户确认
+
+用户: "帮我创建一个日程，明天下午3点需求评审"
+→ 追问结束时间（或使用默认 1 小时）
+→ 调用 create_schedule
+→ 回复日程创建成功
+
+用户: "我今天有什么安排"
+→ 调用 query_schedules 查询今天日程
+→ 返回日程列表
 
 用户: "以后开会默认 30 分钟"
 → 调用 save_memory(module: "preferences", content: "默认会议时长 30 分钟")
@@ -222,6 +237,12 @@ PROMPT;
             'query_room_bookings' => '正在查询会议室预定信息...',
             'save_memory' => '正在保存记忆...',
             'delete_memory' => '正在删除记忆...',
+            'create_calendar' => '正在创建日历...',
+            'create_schedule' => '正在创建日程...',
+            'query_schedules' => '正在查询日程列表...',
+            'get_schedule_detail' => '正在查询日程详情...',
+            'cancel_schedule' => '正在取消日程...',
+            'query_calendars' => '正在查询日历列表...',
             'create_group_chat' => '正在创建群聊...',
             'update_group_chat' => '正在修改群聊...',
             'get_group_chat' => '正在获取群聊信息...',
@@ -233,6 +254,7 @@ PROMPT;
 
     /**
      * 执行 MCP Tool
+     * 自动加载 Tool 所属模块的用户配置（moduleConfig）并透传给 handle 方法
      *
      * @param  string  $toolName  工具名称
      * @param  array  $input  AI 提供的工具参数
@@ -249,9 +271,19 @@ PROMPT;
                 return json_encode(['error' => "未知的工具: {$toolName}"], JSON_UNESCAPED_UNICODE);
             }
 
+            // 加载 Tool 所属模块的用户配置
+            $module = $this->toolRegistry->getModuleForTool($toolName);
+            $moduleConfig = $module
+                ? app(ModuleConfigService::class)->getAll($userId, $module)
+                : [];
+
             $tool = app($toolClass);
             $request = new \Laravel\Mcp\Request($input);
-            $response = app()->call([$tool, 'handle'], ['request' => $request, 'userId' => $userId]);
+            $response = app()->call([$tool, 'handle'], [
+                'request' => $request,
+                'userId' => $userId,
+                'moduleConfig' => $moduleConfig,
+            ]);
 
             return (string) $response->content();
         } catch (\Exception $e) {

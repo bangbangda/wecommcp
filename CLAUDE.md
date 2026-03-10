@@ -62,6 +62,7 @@ Tool schema 只暴露业务参数（title、start_time、invitees）。基础设
 - 测试使用 Pest 语法
 - 所有方法必须编写注释（方法用途、参数、返回值）
 - 对接第三方 API 的请求参数和返回值必须记录日志（`Log::debug`），便于问题排查
+- 编写企微 API 对接代码前，**必须先用 `php artisan skill:search-doc` 查阅官方文档**，逐一核对请求参数和返回字段，严禁凭经验臆测参数
 
 ### Tool Description 与 System Prompt
 
