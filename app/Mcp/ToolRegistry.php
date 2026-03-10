@@ -14,6 +14,12 @@ use App\Mcp\Tools\MeetingRoom\QueryMeetingRoomsTool;
 use App\Mcp\Tools\MeetingRoom\QueryRoomBookingsTool;
 use App\Mcp\Tools\Memory\DeleteMemoryTool;
 use App\Mcp\Tools\Memory\SaveMemoryTool;
+use App\Mcp\Tools\Schedule\CancelScheduleTool;
+use App\Mcp\Tools\Schedule\CreateCalendarTool;
+use App\Mcp\Tools\Schedule\CreateScheduleTool;
+use App\Mcp\Tools\Schedule\GetScheduleDetailTool;
+use App\Mcp\Tools\Schedule\QueryCalendarsTool;
+use App\Mcp\Tools\Schedule\QuerySchedulesTool;
 
 /**
  * 统一 Tool 注册中心
@@ -21,6 +27,28 @@ use App\Mcp\Tools\Memory\SaveMemoryTool;
  */
 class ToolRegistry
 {
+    /** @var array<string, string|null> Tool 名称 → 所属业务模块映射 */
+    private const TOOL_MODULE_MAP = [
+        'create_meeting' => 'meeting',
+        'cancel_meeting' => 'meeting',
+        'update_meeting' => 'meeting',
+        'get_meeting_info' => 'meeting',
+        'query_meetings' => 'meeting',
+        'create_calendar' => 'schedule',
+        'create_schedule' => 'schedule',
+        'query_schedules' => 'schedule',
+        'get_schedule_detail' => 'schedule',
+        'cancel_schedule' => 'schedule',
+        'query_calendars' => 'schedule',
+        'query_meeting_rooms' => 'meeting_room',
+        'book_meeting_room' => 'meeting_room',
+        'cancel_room_booking' => 'meeting_room',
+        'query_room_bookings' => 'meeting_room',
+        'search_contacts' => null,
+        'save_memory' => null,
+        'delete_memory' => null,
+    ];
+
     /** @var array<int, class-string<\Laravel\Mcp\Server\Tool>> 注册的 Tool 类列表 */
     protected array $tools = [
         CreateMeetingTool::class,
@@ -35,6 +63,12 @@ class ToolRegistry
         QueryRoomBookingsTool::class,
         SaveMemoryTool::class,
         DeleteMemoryTool::class,
+        CreateCalendarTool::class,
+        CreateScheduleTool::class,
+        QuerySchedulesTool::class,
+        GetScheduleDetailTool::class,
+        CancelScheduleTool::class,
+        QueryCalendarsTool::class,
     ];
 
     /**
@@ -86,6 +120,17 @@ class ToolRegistry
         }
 
         return $definitions;
+    }
+
+    /**
+     * 根据 Tool 名称获取所属业务模块
+     *
+     * @param  string  $toolName  工具名称
+     * @return string|null 模块标识（schedule/meeting/meeting_room），无模块返回 null
+     */
+    public function getModuleForTool(string $toolName): ?string
+    {
+        return self::TOOL_MODULE_MAP[$toolName] ?? null;
     }
 
     /**
