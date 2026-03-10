@@ -6,6 +6,7 @@ use App\Ai\AiManager;
 use App\Ai\Contracts\AiDriver;
 use App\Mcp\ToolRegistry;
 use App\Wecom\WecomContactClient;
+use App\Wecom\WecomGroupChatClient;
 use App\Wecom\WecomManager;
 use App\Wecom\WecomMeetingClient;
 use App\Wecom\WecomMeetingRoomClient;
@@ -46,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(WecomMessageClient::class, fn ($app) => new WecomMessageClient(
             app: $app->make(WecomManager::class)->app('agent'),
             agentId: config('services.wecom.apps.agent.id'),
+        ));
+
+        $this->app->singleton(WecomGroupChatClient::class, fn ($app) => new WecomGroupChatClient(
+            app: $app->make(WecomManager::class)->app('agent'),
         ));
     }
 

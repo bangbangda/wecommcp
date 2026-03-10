@@ -3,6 +3,11 @@
 namespace App\Mcp;
 
 use App\Mcp\Tools\Contact\SearchContactsTool;
+use App\Mcp\Tools\GroupChat\CreateGroupChatTool;
+use App\Mcp\Tools\GroupChat\GetGroupChatTool;
+use App\Mcp\Tools\GroupChat\QueryGroupChatsTool;
+use App\Mcp\Tools\GroupChat\SendGroupMessageTool;
+use App\Mcp\Tools\GroupChat\UpdateGroupChatTool;
 use App\Mcp\Tools\Meeting\CancelMeetingTool;
 use App\Mcp\Tools\Meeting\CreateMeetingTool;
 use App\Mcp\Tools\Meeting\GetMeetingInfoTool;
@@ -35,6 +40,11 @@ class ToolRegistry
         QueryRoomBookingsTool::class,
         SaveMemoryTool::class,
         DeleteMemoryTool::class,
+        CreateGroupChatTool::class,
+        UpdateGroupChatTool::class,
+        GetGroupChatTool::class,
+        QueryGroupChatsTool::class,
+        SendGroupMessageTool::class,
     ];
 
     /**
