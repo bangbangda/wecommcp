@@ -19,6 +19,8 @@ use App\Mcp\Tools\MeetingRoom\QueryMeetingRoomsTool;
 use App\Mcp\Tools\MeetingRoom\QueryRoomBookingsTool;
 use App\Mcp\Tools\Memory\DeleteMemoryTool;
 use App\Mcp\Tools\Memory\SaveMemoryTool;
+use App\Mcp\Tools\Profile\GetProfileTool;
+use App\Mcp\Tools\Profile\SetProfileTool;
 use App\Mcp\Tools\Schedule\CancelScheduleTool;
 use App\Mcp\Tools\Schedule\CreateCalendarTool;
 use App\Mcp\Tools\Schedule\CreateScheduleTool;
@@ -57,6 +59,8 @@ class ToolRegistry
         'get_group_chat' => null,
         'query_group_chats' => null,
         'send_group_message' => null,
+        'set_profile' => null,
+        'get_profile' => null,
     ];
 
     /** @var array<int, class-string<\Laravel\Mcp\Server\Tool>> 注册的 Tool 类列表 */
@@ -84,6 +88,8 @@ class ToolRegistry
         GetGroupChatTool::class,
         QueryGroupChatsTool::class,
         SendGroupMessageTool::class,
+        SetProfileTool::class,
+        GetProfileTool::class,
     ];
 
     /**

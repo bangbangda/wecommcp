@@ -18,6 +18,8 @@ use App\Mcp\Tools\MeetingRoom\QueryMeetingRoomsTool;
 use App\Mcp\Tools\MeetingRoom\QueryRoomBookingsTool;
 use App\Mcp\Tools\Memory\DeleteMemoryTool;
 use App\Mcp\Tools\Memory\SaveMemoryTool;
+use App\Mcp\Tools\Profile\GetProfileTool;
+use App\Mcp\Tools\Profile\SetProfileTool;
 use App\Mcp\Tools\Schedule\CancelScheduleTool;
 use App\Mcp\Tools\Schedule\CreateCalendarTool;
 use App\Mcp\Tools\Schedule\CreateScheduleTool;
@@ -30,7 +32,7 @@ test('getToolClasses 返回所有注册的 Tool 类', function () {
 
     $classes = $registry->getToolClasses();
 
-    expect($classes)->toHaveCount(23)
+    expect($classes)->toHaveCount(25)
         ->toContain(CreateMeetingTool::class)
         ->toContain(CancelMeetingTool::class)
         ->toContain(UpdateMeetingTool::class)
@@ -53,7 +55,9 @@ test('getToolClasses 返回所有注册的 Tool 类', function () {
         ->toContain(UpdateGroupChatTool::class)
         ->toContain(GetGroupChatTool::class)
         ->toContain(QueryGroupChatsTool::class)
-        ->toContain(SendGroupMessageTool::class);
+        ->toContain(SendGroupMessageTool::class)
+        ->toContain(SetProfileTool::class)
+        ->toContain(GetProfileTool::class);
 });
 
 test('getToolMap 返回正确的 name → class 映射', function () {
@@ -61,7 +65,7 @@ test('getToolMap 返回正确的 name → class 映射', function () {
 
     $map = $registry->getToolMap();
 
-    expect($map)->toHaveCount(23)
+    expect($map)->toHaveCount(25)
         ->toHaveKey('create_meeting', CreateMeetingTool::class)
         ->toHaveKey('cancel_meeting', CancelMeetingTool::class)
         ->toHaveKey('update_meeting', UpdateMeetingTool::class)
@@ -84,7 +88,9 @@ test('getToolMap 返回正确的 name → class 映射', function () {
         ->toHaveKey('update_group_chat', UpdateGroupChatTool::class)
         ->toHaveKey('get_group_chat', GetGroupChatTool::class)
         ->toHaveKey('query_group_chats', QueryGroupChatsTool::class)
-        ->toHaveKey('send_group_message', SendGroupMessageTool::class);
+        ->toHaveKey('send_group_message', SendGroupMessageTool::class)
+        ->toHaveKey('set_profile', SetProfileTool::class)
+        ->toHaveKey('get_profile', GetProfileTool::class);
 });
 
 test('getClaudeToolDefinitions 格式正确', function () {
@@ -92,7 +98,7 @@ test('getClaudeToolDefinitions 格式正确', function () {
 
     $definitions = $registry->getClaudeToolDefinitions();
 
-    expect($definitions)->toHaveCount(23);
+    expect($definitions)->toHaveCount(25);
 
     // 每个定义包含 name、description、input_schema
     foreach ($definitions as $def) {

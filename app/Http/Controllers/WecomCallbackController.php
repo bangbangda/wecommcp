@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ProcessWecomMessage;
 use App\Models\WecomBotMessage;
+use App\Services\UserProfileService;
 use EasyWeChat\Work\Application as WecomApp;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -65,6 +66,7 @@ class WecomCallbackController extends Controller
             'text' => $this->handleTextMessage($message),
             'voice' => $this->handleVoiceMessage($message),
             'stream' => $this->handleStreamMessage($message),
+            'event' => $this->handleEventMessage($message),
             default => null,
         };
     }
@@ -95,6 +97,54 @@ class WecomCallbackController extends Controller
         $content = $message->voice['content'] ?? '';
 
         return $this->processNewMessage($message, $content);
+    }
+
+    /**
+     * 处理事件消息
+     * 根据 event.eventtype 分发，目前支持 enter_chat（进入会话）
+     *
+     * @param  \EasyWeChat\Work\Message  $message  消息对象
+     * @return array|null 响应数组，不支持的事件返回 null
+     */
+    private function handleEventMessage($message): ?array
+    {
+        $eventType = $message->event['eventtype'] ?? '';
+        $userId = (string) ($message->from['userid'] ?? '');
+
+        Log::debug('WecomCallbackController 收到事件', [
+            'eventtype' => $eventType,
+            'userid' => $userId,
+        ]);
+
+        return match ($eventType) {
+            'enter_chat' => $this->handleEnterChat($userId),
+            default => null,
+        };
+    }
+
+    /**
+     * 处理用户进入会话事件
+     * 根据用户 profile 生成个性化或默认欢迎语，5 秒内返回
+     *
+     * @param  string  $userId  用户 userid
+     * @return array 欢迎语响应数组
+     */
+    private function handleEnterChat(string $userId): array
+    {
+        $profileService = app(UserProfileService::class);
+        $welcomeText = $profileService->buildWelcomeMessage($userId);
+
+        Log::info('WecomCallbackController 发送欢迎语', [
+            'userid' => $userId,
+            'welcome' => $welcomeText,
+        ]);
+
+        return [
+            'msgtype' => 'text',
+            'text' => [
+                'content' => $welcomeText,
+            ],
+        ];
     }
 
     /**
