@@ -16,7 +16,7 @@ use Laravel\Mcp\Server\Tool;
 当用户说"每天早上9点...""每个工作日...""每周五下午4点...""每月1号..."等
 涉及重复执行的任务时使用此工具。
 action_type：send_group_message（群消息，需要 chatid，不知道时先用 query_group_chats 查询）、
-send_user_message（提醒自己）。
+send_user_message（发送应用消息，提醒自己或指定用户。提醒自己时不需要 target_id；提醒其他人时需要对方的 userid，不知道时先用 search_contacts 查询）。
 schedule_type：daily（每天）、weekdays（工作日，周一至周五）、weekly（每周某天）、monthly（每月某号）。')]
 class CreateRecurringTaskTool extends Tool
 {
@@ -30,8 +30,8 @@ class CreateRecurringTaskTool extends Tool
     {
         return [
             'title' => $schema->string('任务标题，简要描述任务内容')->required(),
-            'action_type' => $schema->string('动作类型：send_group_message（发群消息）/ send_user_message（提醒自己）')->required(),
-            'target_id' => $schema->string('目标 chatid，action_type 为 send_group_message 时必填'),
+            'action_type' => $schema->string('动作类型：send_group_message（发群消息）/ send_user_message（发应用消息，提醒自己或他人）')->required(),
+            'target_id' => $schema->string('目标 ID。群消息时为 chatid（用 query_group_chats 查询）；用户消息时为 userid（用 search_contacts 查询），提醒自己时不填'),
             'content' => $schema->string('消息内容')->required(),
             'msg_type' => $schema->string('消息类型：text（默认）或 markdown，仅群消息有效'),
             'schedule_type' => $schema->string('调度类型：daily（每天）/ weekdays（工作日）/ weekly（每周）/ monthly（每月）')->required(),
@@ -95,6 +95,8 @@ class CreateRecurringTaskTool extends Tool
         if ($data['action_type'] === 'send_group_message') {
             $actionParams['chatid'] = $data['target_id'];
             $actionParams['msg_type'] = $data['msg_type'] ?? 'text';
+        } elseif ($data['action_type'] === 'send_user_message' && ! empty($data['target_id'])) {
+            $actionParams['target_userid'] = $data['target_id'];
         }
 
         // 组装 schedule_config

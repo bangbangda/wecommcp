@@ -13,10 +13,10 @@ use Laravel\Mcp\Server\Tool;
 
 #[Name('create_onetime_task')]
 #[Description('创建一次性定时任务。
-当用户说"30分钟后提醒我...""明天上午10点发条消息到群里""下午3点提醒我开会""2小时后通知我确认报价"等
+当用户说"30分钟后提醒我...""明天上午10点发条消息到群里""下午3点提醒我开会""2小时后通知我确认报价""明天10点提醒张三交报告"等
 涉及单次、未来某个时间点执行的任务时使用此工具。
 action_type：send_group_message（群消息，需要 chatid，不知道时先用 query_group_chats 查询）、
-send_user_message（提醒自己）。
+send_user_message（发送应用消息，提醒自己或指定用户。提醒自己时不需要 target_id；提醒其他人时需要对方的 userid，不知道时先用 search_contacts 查询）。
 重要：需将相对时间（"30分钟后""明天10点"）转为绝对的 execute_date + execute_time。')]
 class CreateOnetimeTaskTool extends Tool
 {
@@ -30,8 +30,8 @@ class CreateOnetimeTaskTool extends Tool
     {
         return [
             'title' => $schema->string('任务标题，简要描述任务内容')->required(),
-            'action_type' => $schema->string('动作类型：send_group_message（发群消息）/ send_user_message（提醒自己）')->required(),
-            'target_id' => $schema->string('目标 chatid，action_type 为 send_group_message 时必填'),
+            'action_type' => $schema->string('动作类型：send_group_message（发群消息）/ send_user_message（发应用消息，提醒自己或他人）')->required(),
+            'target_id' => $schema->string('目标 ID。群消息时为 chatid（用 query_group_chats 查询）；用户消息时为 userid（用 search_contacts 查询），提醒自己时不填'),
             'content' => $schema->string('消息内容')->required(),
             'msg_type' => $schema->string('消息类型：text（默认）或 markdown，仅群消息有效'),
             'execute_date' => $schema->string('执行日期 YYYY-MM-DD')->required(),
@@ -75,6 +75,8 @@ class CreateOnetimeTaskTool extends Tool
         if ($data['action_type'] === 'send_group_message') {
             $actionParams['chatid'] = $data['target_id'];
             $actionParams['msg_type'] = $data['msg_type'] ?? 'text';
+        } elseif ($data['action_type'] === 'send_user_message' && ! empty($data['target_id'])) {
+            $actionParams['target_userid'] = $data['target_id'];
         }
 
         $result = $service->create($userId, [

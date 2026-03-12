@@ -297,20 +297,23 @@ class ScheduledTaskService
 
     /**
      * 执行用户提醒消息发送
+     * 优先发给 action_params 中指定的 target_userid，未指定则发给任务创建者
      *
-     * @param  string  $userId  用户 userid
-     * @param  array  $params  动作参数 {content}
+     * @param  string  $userId  任务创建者 userid
+     * @param  array  $params  动作参数 {content, target_userid?}
      */
     private function executeSendUserMessage(string $userId, array $params): void
     {
+        $targetUserId = $params['target_userid'] ?? $userId;
         $content = $params['content'];
 
         Log::debug('ScheduledTaskService 发送用户提醒', [
-            'userId' => $userId,
+            'targetUserId' => $targetUserId,
+            'creatorUserId' => $userId,
             'content' => $content,
         ]);
 
-        app(\App\Wecom\WecomMessageClient::class)->sendText($userId, $content);
+        app(\App\Wecom\WecomMessageClient::class)->sendText($targetUserId, $content);
     }
 
     /**

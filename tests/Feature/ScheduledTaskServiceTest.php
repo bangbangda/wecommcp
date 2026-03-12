@@ -263,6 +263,37 @@ test('executeTask send_user_message 调用 WecomMessageClient', function () {
     Carbon::setTestNow();
 });
 
+test('executeTask send_user_message 指定 target_userid 发送给其他用户', function () {
+    $mockClient = Mockery::mock(\App\Wecom\WecomMessageClient::class);
+    $mockClient->shouldReceive('sendText')
+        ->once()
+        ->with('zhangsan', '记得交项目报告');
+    app()->instance(\App\Wecom\WecomMessageClient::class, $mockClient);
+
+    Carbon::setTestNow(Carbon::parse('2026-03-12 10:00:00', 'Asia/Shanghai'));
+
+    $task = ScheduledTask::create([
+        'user_id' => 'user1',
+        'title' => '提醒张三交报告',
+        'action_type' => 'send_user_message',
+        'action_params' => ['content' => '记得交项目报告', 'target_userid' => 'zhangsan'],
+        'schedule_type' => 'once',
+        'execute_time' => '15:00',
+        'schedule_config' => ['execute_date' => '2026-03-12'],
+        'next_run_at' => now(),
+        'is_active' => true,
+    ]);
+
+    $service = app(ScheduledTaskService::class);
+    $service->executeTask($task);
+
+    $task->refresh();
+    expect($task->is_active)->toBeFalse()
+        ->and($task->last_run_at)->not->toBeNull();
+
+    Carbon::setTestNow();
+});
+
 test('markExecuted once 类型设置 is_active 为 false', function () {
     Carbon::setTestNow(Carbon::parse('2026-03-12 15:00:00', 'Asia/Shanghai'));
 

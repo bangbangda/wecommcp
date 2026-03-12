@@ -41,6 +41,34 @@ test('create_onetime_task 创建成功', function () {
     Carbon::setTestNow();
 });
 
+test('create_onetime_task 提醒其他用户创建成功', function () {
+    Queue::fake();
+
+    Carbon::setTestNow(Carbon::parse('2026-03-12 10:00:00', 'Asia/Shanghai'));
+
+    $tool = app(\App\Mcp\Tools\ScheduledTask\CreateOnetimeTaskTool::class);
+    $request = new Request([
+        'title' => '提醒张三交报告',
+        'action_type' => 'send_user_message',
+        'target_id' => 'zhangsan',
+        'content' => '记得交项目报告',
+        'execute_date' => '2026-03-13',
+        'execute_time' => '10:00',
+    ]);
+
+    $response = app()->call([$tool, 'handle'], ['request' => $request, 'userId' => 'user1']);
+    $result = json_decode($response->content(), true);
+
+    expect($result['status'])->toBe('success')
+        ->and($result['task_id'])->toBeInt();
+
+    $task = ScheduledTask::find($result['task_id']);
+    expect($task->action_params['target_userid'])->toBe('zhangsan')
+        ->and($task->user_id)->toBe('user1');
+
+    Carbon::setTestNow();
+});
+
 test('create_onetime_task 过期时间返回错误', function () {
     Carbon::setTestNow(Carbon::parse('2026-03-12 16:00:00', 'Asia/Shanghai'));
 

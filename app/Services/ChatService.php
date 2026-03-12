@@ -97,7 +97,8 @@ class ChatService
 - 当用户提到"每天""每周""定时""提醒我""到时候""定期"等涉及定时或延迟的操作时，使用定时任务工具
 - 区分一次性（"30分钟后""明天10点"）和周期性（"每天""每周五""工作日"）
 - 一次性任务需将相对时间（"30分钟后"）转为绝对日期和时间
-- 群消息任务需要 chatid，不确定时先查询群聊
+- 群消息任务需要 chatid，不确定时先用 query_group_chats 查询
+- 提醒其他人时需要对方的 userid，不确定时先用 search_contacts 查询，多候选时让用户选择
 - 创建成功后告知用户具体的下次执行时间
 {$profileGuide}
 ## 注意事项
@@ -141,6 +142,12 @@ class ChatService
 → 计算 30 分钟后的绝对时间（如 15:30），拆为 execute_date + execute_time
 → 调用 create_onetime_task(action_type=send_user_message, execute_date=2026-03-12, execute_time=15:30, ...)
 → 回复确认，告知将在 15:30 提醒
+
+用户: "明天上午10点提醒张三交项目报告"
+→ 调用 search_contacts(name: "张三") 查询 userid
+→ 如果匹配到多个候选，展示列表让用户选择
+→ 调用 create_onetime_task(action_type=send_user_message, target_id=zhangsan_userid, execute_date=..., execute_time=10:00, ...)
+→ 回复确认，告知将在明天 10:00 提醒张三
 PROMPT;
     }
 
