@@ -26,13 +26,17 @@ use App\Mcp\Tools\Schedule\CreateScheduleTool;
 use App\Mcp\Tools\Schedule\GetScheduleDetailTool;
 use App\Mcp\Tools\Schedule\QueryCalendarsTool;
 use App\Mcp\Tools\Schedule\QuerySchedulesTool;
+use App\Mcp\Tools\ScheduledTask\CancelScheduledTaskTool;
+use App\Mcp\Tools\ScheduledTask\CreateOnetimeTaskTool;
+use App\Mcp\Tools\ScheduledTask\CreateRecurringTaskTool;
+use App\Mcp\Tools\ScheduledTask\QueryScheduledTasksTool;
 
 test('getToolClasses 返回所有注册的 Tool 类', function () {
     $registry = app(ToolRegistry::class);
 
     $classes = $registry->getToolClasses();
 
-    expect($classes)->toHaveCount(25)
+    expect($classes)->toHaveCount(29)
         ->toContain(CreateMeetingTool::class)
         ->toContain(CancelMeetingTool::class)
         ->toContain(UpdateMeetingTool::class)
@@ -57,7 +61,11 @@ test('getToolClasses 返回所有注册的 Tool 类', function () {
         ->toContain(QueryGroupChatsTool::class)
         ->toContain(SendGroupMessageTool::class)
         ->toContain(SetProfileTool::class)
-        ->toContain(GetProfileTool::class);
+        ->toContain(GetProfileTool::class)
+        ->toContain(CreateOnetimeTaskTool::class)
+        ->toContain(CreateRecurringTaskTool::class)
+        ->toContain(QueryScheduledTasksTool::class)
+        ->toContain(CancelScheduledTaskTool::class);
 });
 
 test('getToolMap 返回正确的 name → class 映射', function () {
@@ -65,7 +73,7 @@ test('getToolMap 返回正确的 name → class 映射', function () {
 
     $map = $registry->getToolMap();
 
-    expect($map)->toHaveCount(25)
+    expect($map)->toHaveCount(29)
         ->toHaveKey('create_meeting', CreateMeetingTool::class)
         ->toHaveKey('cancel_meeting', CancelMeetingTool::class)
         ->toHaveKey('update_meeting', UpdateMeetingTool::class)
@@ -90,7 +98,11 @@ test('getToolMap 返回正确的 name → class 映射', function () {
         ->toHaveKey('query_group_chats', QueryGroupChatsTool::class)
         ->toHaveKey('send_group_message', SendGroupMessageTool::class)
         ->toHaveKey('set_profile', SetProfileTool::class)
-        ->toHaveKey('get_profile', GetProfileTool::class);
+        ->toHaveKey('get_profile', GetProfileTool::class)
+        ->toHaveKey('create_onetime_task', CreateOnetimeTaskTool::class)
+        ->toHaveKey('create_recurring_task', CreateRecurringTaskTool::class)
+        ->toHaveKey('query_scheduled_tasks', QueryScheduledTasksTool::class)
+        ->toHaveKey('cancel_scheduled_task', CancelScheduledTaskTool::class);
 });
 
 test('getClaudeToolDefinitions 格式正确', function () {
@@ -98,7 +110,7 @@ test('getClaudeToolDefinitions 格式正确', function () {
 
     $definitions = $registry->getClaudeToolDefinitions();
 
-    expect($definitions)->toHaveCount(25);
+    expect($definitions)->toHaveCount(29);
 
     // 每个定义包含 name、description、input_schema
     foreach ($definitions as $def) {

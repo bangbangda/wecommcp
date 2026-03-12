@@ -27,6 +27,10 @@ use App\Mcp\Tools\Schedule\CreateScheduleTool;
 use App\Mcp\Tools\Schedule\GetScheduleDetailTool;
 use App\Mcp\Tools\Schedule\QueryCalendarsTool;
 use App\Mcp\Tools\Schedule\QuerySchedulesTool;
+use App\Mcp\Tools\ScheduledTask\CancelScheduledTaskTool;
+use App\Mcp\Tools\ScheduledTask\CreateOnetimeTaskTool;
+use App\Mcp\Tools\ScheduledTask\CreateRecurringTaskTool;
+use App\Mcp\Tools\ScheduledTask\QueryScheduledTasksTool;
 
 /**
  * 统一 Tool 注册中心
@@ -61,6 +65,10 @@ class ToolRegistry
         'send_group_message' => null,
         'set_profile' => null,
         'get_profile' => null,
+        'create_onetime_task' => null,
+        'create_recurring_task' => null,
+        'query_scheduled_tasks' => null,
+        'cancel_scheduled_task' => null,
     ];
 
     /** @var array<int, class-string<\Laravel\Mcp\Server\Tool>> 注册的 Tool 类列表 */
@@ -90,6 +98,10 @@ class ToolRegistry
         SendGroupMessageTool::class,
         SetProfileTool::class,
         GetProfileTool::class,
+        CreateOnetimeTaskTool::class,
+        CreateRecurringTaskTool::class,
+        QueryScheduledTasksTool::class,
+        CancelScheduledTaskTool::class,
     ];
 
     /**
