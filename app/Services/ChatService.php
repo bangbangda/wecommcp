@@ -92,6 +92,13 @@ class ChatService
 当用户要求忘掉某条信息时，根据记忆列表中的 [Mn] ID 调用 delete_memory 删除。
 利用已有记忆提供个性化服务：如用户说"建个会"且记忆中有默认时长偏好，可直接使用。
 不要重复保存已有的记忆。
+
+### 定时任务
+- 当用户提到"每天""每周""定时""提醒我""到时候""定期"等涉及定时或延迟的操作时，使用定时任务工具
+- 区分一次性（"30分钟后""明天10点"）和周期性（"每天""每周五""工作日"）
+- 一次性任务需将相对时间（"30分钟后"）转为绝对日期和时间
+- 群消息任务需要 chatid，不确定时先查询群聊
+- 创建成功后告知用户具体的下次执行时间
 {$profileGuide}
 ## 注意事项
 - 时间转换为 ISO 8601 格式（如 2026-02-26T15:00:00）
@@ -124,6 +131,16 @@ class ChatService
 用户: "以后开会默认 30 分钟"
 → 调用 save_memory(module: "preferences", content: "默认会议时长 30 分钟")
 → 回复确认已记住
+
+用户: "每天早上9点在产品群发：大家记得提交日报"
+→ 调用 query_group_chats(keyword: "产品") 查询 chatid
+→ 调用 create_recurring_task(action_type=send_group_message, schedule_type=daily, execute_time=09:00, ...)
+→ 回复确认，告知下次执行时间
+
+用户: "30分钟后提醒我确认报价信息"
+→ 计算 30 分钟后的绝对时间（如 15:30），拆为 execute_date + execute_time
+→ 调用 create_onetime_task(action_type=send_user_message, execute_date=2026-03-12, execute_time=15:30, ...)
+→ 回复确认，告知将在 15:30 提醒
 PROMPT;
     }
 
@@ -293,6 +310,10 @@ GUIDE;
             'send_group_message' => '正在发送群消息...',
             'set_profile' => '正在设置个性化配置...',
             'get_profile' => '正在查看个性化配置...',
+            'create_onetime_task' => '正在创建定时任务...',
+            'create_recurring_task' => '正在创建定时任务...',
+            'query_scheduled_tasks' => '正在查询定时任务...',
+            'cancel_scheduled_task' => '正在取消定时任务...',
             default => '正在执行操作...',
         };
     }
