@@ -22,6 +22,7 @@ class ChatService
         private AiDriver $aiDriver,
         private ToolRegistry $toolRegistry,
         private UserMemoryService $memoryService,
+        private UserProfileService $profileService,
     ) {}
 
     /**
@@ -55,9 +56,13 @@ class ChatService
         $now = now('Asia/Shanghai')->format('Y-m-d H:i:s (l)');
         $capabilities = $this->toolRegistry->getCapabilitiesSummary();
         $memoryBlock = $this->buildMemoryBlock($userId);
+        $profileBlock = $this->buildProfileBlock($userId);
+        $hasProfile = ! empty($profileBlock);
+        $identity = $profileBlock ?: '你是企业微信 AI 助手，帮助用户管理会议、日程、日历和查询联系人。';
+        $profileGuide = $hasProfile ? '' : $this->buildProfileGuide();
 
         return <<<PROMPT
-你是企业微信 AI 助手，帮助用户管理会议、日程、日历和查询联系人。
+{$identity}
 
 当前时间：{$now}
 当前用户：{$userId}
@@ -87,7 +92,7 @@ class ChatService
 当用户要求忘掉某条信息时，根据记忆列表中的 [Mn] ID 调用 delete_memory 删除。
 利用已有记忆提供个性化服务：如用户说"建个会"且记忆中有默认时长偏好，可直接使用。
 不要重复保存已有的记忆。
-
+{$profileGuide}
 ## 注意事项
 - 时间转换为 ISO 8601 格式（如 2026-02-26T15:00:00）
 - 创建会议时，当前用户自动作为管理员和参会人，invitees 只填其他参会人
@@ -120,6 +125,44 @@ class ChatService
 → 调用 save_memory(module: "preferences", content: "默认会议时长 30 分钟")
 → 回复确认已记住
 PROMPT;
+    }
+
+    /**
+     * 构建个性化设置引导文本
+     * 仅在用户无 profile 时注入，引导 AI 在合适时机提示用户设置
+     *
+     * @return string 引导文本
+     */
+    private function buildProfileGuide(): string
+    {
+        return <<<'GUIDE'
+
+### 个性化引导
+当前用户还没有个性化设置。在以下时机，可以**简短地**提一句个性化功能（一句话即可，不要列清单）：
+- 首次对话（如打招呼、自我介绍时）
+- 成功完成用户任务后，自然地附带提一句
+
+示例："对了，你可以给我起个名字，或者告诉我你喜欢什么风格的回复，我可以调整哦~"
+
+注意：
+- **永远先完成用户的任务**，引导只是附带
+- 同一轮对话只提一次，不要反复提醒
+- 如果用户在聊正事（如连续操作会议/日程），不要打断
+- 用户说"不需要""以后再说"时不再提起
+
+GUIDE;
+    }
+
+    /**
+     * 构建用户个性化 profile 注入块
+     * 无 profile 时返回空字符串，有 profile 时返回个性化身份描述
+     *
+     * @param  string  $userId  用户 ID
+     * @return string profile 块文本
+     */
+    private function buildProfileBlock(string $userId): string
+    {
+        return $this->profileService->formatForPrompt($userId);
     }
 
     /**
@@ -248,6 +291,8 @@ PROMPT;
             'get_group_chat' => '正在获取群聊信息...',
             'query_group_chats' => '正在查询群聊列表...',
             'send_group_message' => '正在发送群消息...',
+            'set_profile' => '正在设置个性化配置...',
+            'get_profile' => '正在查看个性化配置...',
             default => '正在执行操作...',
         };
     }

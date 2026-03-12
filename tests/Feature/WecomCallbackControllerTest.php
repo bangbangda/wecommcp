@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\ProcessWecomMessage;
+use App\Models\UserProfile;
 use App\Models\WecomBotMessage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -227,6 +228,79 @@ test('MsgId 去重返回已有 stream 状态', function () {
 
     // 不应重复派发 Job
     Queue::assertNotPushed(ProcessWecomMessage::class);
+});
+
+test('enter_chat 事件无 profile 返回默认欢迎语', function () {
+    Queue::fake();
+
+    $message = new \EasyWeChat\Work\Message([
+        'msgtype' => 'event',
+        'msgid' => 'msg_event_001',
+        'event' => ['eventtype' => 'enter_chat'],
+        'from' => ['userid' => 'user001'],
+        'aibotid' => 'bot001',
+        'chattype' => 'single',
+    ]);
+
+    mockWecomServer($message);
+
+    $response = $this->post('/wecom/callback');
+
+    $response->assertStatus(200);
+
+    $json = json_decode($response->getContent(), true);
+    expect($json['msgtype'])->toBe('text')
+        ->and($json['text']['content'])->toContain('👋')
+        ->and($json['text']['content'])->toContain('第一次见面');
+
+    // 事件不应派发消息处理 Job
+    Queue::assertNotPushed(ProcessWecomMessage::class);
+});
+
+test('enter_chat 事件有 profile 返回个性化欢迎语', function () {
+    Queue::fake();
+
+    UserProfile::create([
+        'user_id' => 'user001',
+        'bot_name' => '小微',
+        'user_nickname' => '老板',
+    ]);
+
+    $message = new \EasyWeChat\Work\Message([
+        'msgtype' => 'event',
+        'msgid' => 'msg_event_002',
+        'event' => ['eventtype' => 'enter_chat'],
+        'from' => ['userid' => 'user001'],
+        'aibotid' => 'bot001',
+        'chattype' => 'single',
+    ]);
+
+    mockWecomServer($message);
+
+    $response = $this->post('/wecom/callback');
+
+    $json = json_decode($response->getContent(), true);
+    expect($json['msgtype'])->toBe('text')
+        ->and($json['text']['content'])->toContain('老板')
+        ->and($json['text']['content'])->toContain('小微');
+});
+
+test('未知事件类型返回 success', function () {
+    Queue::fake();
+
+    $message = new \EasyWeChat\Work\Message([
+        'msgtype' => 'event',
+        'msgid' => 'msg_event_003',
+        'event' => ['eventtype' => 'feedback_event'],
+        'from' => ['userid' => 'user001'],
+    ]);
+
+    mockWecomServer($message);
+
+    $response = $this->post('/wecom/callback');
+
+    $response->assertStatus(200);
+    expect($response->getContent())->toBe('success');
 });
 
 test('非文本/语音/stream 消息返回 success', function () {
