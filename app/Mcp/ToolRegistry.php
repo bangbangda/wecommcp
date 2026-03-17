@@ -3,6 +3,8 @@
 namespace App\Mcp;
 
 use App\Mcp\Tools\Contact\SearchContactsTool;
+use App\Mcp\Tools\ExternalContact\ListExternalContactsTool;
+use App\Mcp\Tools\ExternalContact\SearchExternalContactsTool;
 use App\Mcp\Tools\GroupChat\CreateGroupChatTool;
 use App\Mcp\Tools\GroupChat\GetGroupChatTool;
 use App\Mcp\Tools\GroupChat\QueryGroupChatsTool;
@@ -56,6 +58,8 @@ class ToolRegistry
         'cancel_room_booking' => 'meeting_room',
         'query_room_bookings' => 'meeting_room',
         'search_contacts' => null,
+        'search_external_contacts' => null,
+        'list_external_contacts' => null,
         'save_memory' => null,
         'delete_memory' => null,
         'create_group_chat' => null,
@@ -102,6 +106,8 @@ class ToolRegistry
         CreateRecurringTaskTool::class,
         QueryScheduledTasksTool::class,
         CancelScheduledTaskTool::class,
+        SearchExternalContactsTool::class,
+        ListExternalContactsTool::class,
     ];
 
     /**
