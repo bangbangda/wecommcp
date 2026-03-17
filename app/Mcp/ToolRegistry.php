@@ -3,6 +3,13 @@
 namespace App\Mcp;
 
 use App\Mcp\Tools\Contact\SearchContactsTool;
+use App\Mcp\Tools\Document\CreateDocumentTool;
+use App\Mcp\Tools\Document\DeleteDocumentTool;
+use App\Mcp\Tools\Document\GetDocumentContentTool;
+use App\Mcp\Tools\Document\GetDocumentInfoTool;
+use App\Mcp\Tools\Document\RenameDocumentTool;
+use App\Mcp\Tools\Document\ShareDocumentTool;
+use App\Mcp\Tools\Document\UpdateDocumentContentTool;
 use App\Mcp\Tools\ExternalContact\ListExternalContactsTool;
 use App\Mcp\Tools\ExternalContact\SearchExternalContactsTool;
 use App\Mcp\Tools\GroupChat\CreateGroupChatTool;
@@ -73,6 +80,13 @@ class ToolRegistry
         'create_recurring_task' => null,
         'query_scheduled_tasks' => null,
         'cancel_scheduled_task' => null,
+        'create_document' => null,
+        'get_document_info' => null,
+        'share_document' => null,
+        'rename_document' => null,
+        'delete_document' => null,
+        'get_document_content' => null,
+        'update_document_content' => null,
     ];
 
     /** @var array<int, class-string<\Laravel\Mcp\Server\Tool>> 注册的 Tool 类列表 */
@@ -108,6 +122,13 @@ class ToolRegistry
         CancelScheduledTaskTool::class,
         SearchExternalContactsTool::class,
         ListExternalContactsTool::class,
+        CreateDocumentTool::class,
+        GetDocumentInfoTool::class,
+        ShareDocumentTool::class,
+        RenameDocumentTool::class,
+        DeleteDocumentTool::class,
+        GetDocumentContentTool::class,
+        UpdateDocumentContentTool::class,
     ];
 
     /**
