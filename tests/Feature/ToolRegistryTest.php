@@ -2,6 +2,8 @@
 
 use App\Mcp\ToolRegistry;
 use App\Mcp\Tools\Contact\SearchContactsTool;
+use App\Mcp\Tools\ExternalContact\ListExternalContactsTool;
+use App\Mcp\Tools\ExternalContact\SearchExternalContactsTool;
 use App\Mcp\Tools\GroupChat\CreateGroupChatTool;
 use App\Mcp\Tools\GroupChat\GetGroupChatTool;
 use App\Mcp\Tools\GroupChat\QueryGroupChatsTool;
@@ -36,7 +38,7 @@ test('getToolClasses 返回所有注册的 Tool 类', function () {
 
     $classes = $registry->getToolClasses();
 
-    expect($classes)->toHaveCount(29)
+    expect($classes)->toHaveCount(31)
         ->toContain(CreateMeetingTool::class)
         ->toContain(CancelMeetingTool::class)
         ->toContain(UpdateMeetingTool::class)
@@ -65,7 +67,9 @@ test('getToolClasses 返回所有注册的 Tool 类', function () {
         ->toContain(CreateOnetimeTaskTool::class)
         ->toContain(CreateRecurringTaskTool::class)
         ->toContain(QueryScheduledTasksTool::class)
-        ->toContain(CancelScheduledTaskTool::class);
+        ->toContain(CancelScheduledTaskTool::class)
+        ->toContain(SearchExternalContactsTool::class)
+        ->toContain(ListExternalContactsTool::class);
 });
 
 test('getToolMap 返回正确的 name → class 映射', function () {
@@ -73,7 +77,7 @@ test('getToolMap 返回正确的 name → class 映射', function () {
 
     $map = $registry->getToolMap();
 
-    expect($map)->toHaveCount(29)
+    expect($map)->toHaveCount(31)
         ->toHaveKey('create_meeting', CreateMeetingTool::class)
         ->toHaveKey('cancel_meeting', CancelMeetingTool::class)
         ->toHaveKey('update_meeting', UpdateMeetingTool::class)
@@ -102,7 +106,9 @@ test('getToolMap 返回正确的 name → class 映射', function () {
         ->toHaveKey('create_onetime_task', CreateOnetimeTaskTool::class)
         ->toHaveKey('create_recurring_task', CreateRecurringTaskTool::class)
         ->toHaveKey('query_scheduled_tasks', QueryScheduledTasksTool::class)
-        ->toHaveKey('cancel_scheduled_task', CancelScheduledTaskTool::class);
+        ->toHaveKey('cancel_scheduled_task', CancelScheduledTaskTool::class)
+        ->toHaveKey('search_external_contacts', SearchExternalContactsTool::class)
+        ->toHaveKey('list_external_contacts', ListExternalContactsTool::class);
 });
 
 test('getClaudeToolDefinitions 格式正确', function () {
@@ -110,7 +116,7 @@ test('getClaudeToolDefinitions 格式正确', function () {
 
     $definitions = $registry->getClaudeToolDefinitions();
 
-    expect($definitions)->toHaveCount(29);
+    expect($definitions)->toHaveCount(31);
 
     // 每个定义包含 name、description、input_schema
     foreach ($definitions as $def) {
