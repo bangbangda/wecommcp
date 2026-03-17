@@ -11,6 +11,10 @@
 - **多模型支持** — Ollama / Claude / OpenAI / DeepSeek 一键切换
 - **拼音智能匹配** — 支持同音字、首字母缩写匹配联系人（"王伟" = "汪伟"）
 - **用户记忆** — 自动记住用户偏好和习惯，个性化响应
+- **个性化 Profile** — 自定义 AI 名字、人设、欢迎语，进入会话自动问候
+- **定时任务** — 一次性（"30分钟后提醒我"）和周期性（"每天9点发日报提醒"）定时消息
+- **外部联系人管理** — 客户信息同步、搜索、回调实时更新，支持按时间范围查询
+- **聊天记录智能分析** — 基于会话内容存档，AI 自动提取待办/决策/时间节点，每日生成工作日报推送
 - **Claude Code Skills** — 内置 API 文档查询 Skill，辅助开发
 
 ## 已支持的 MCP Tools
@@ -37,15 +41,63 @@
 | | GetGroupChatTool | 获取群聊详情 |
 | | QueryGroupChatsTool | 查询我创建/参与的群聊 |
 | | SendGroupMessageTool | 推送消息到群聊（支持 @成员） |
-| 联系人 | SearchContactsTool | 搜索联系人（拼音四级匹配） |
+| 联系人 | SearchContactsTool | 搜索内部联系人（拼音四级匹配） |
+| 外部联系人 | SearchExternalContactsTool | 搜索外部联系人/客户（拼音四级匹配 + 备注名） |
+| | ListExternalContactsTool | 列出外部联系人，支持按员工和时间范围筛选 |
 | 记忆 | SaveMemoryTool | 保存用户偏好/习惯 |
 | | DeleteMemoryTool | 删除记忆 |
+| 个性化 | SetProfileTool | 设置 AI 名字/人设/欢迎语等 |
+| | GetProfileTool | 查看当前个性化配置 |
+| 定时任务 | CreateOnetimeTaskTool | 创建一次性定时任务（"30分钟后提醒我"） |
+| | CreateRecurringTaskTool | 创建周期性定时任务（每天/工作日/每周/每月） |
+| | QueryScheduledTasksTool | 查询定时任务列表 |
+| | CancelScheduledTaskTool | 取消定时任务 |
+
+## 聊天记录智能分析
+
+基于企微会话内容存档，每日自动分析员工聊天记录，提取结构化工作洞察并生成日报推送。
+
+**分层知识架构：**
+
+```
+Layer 2: 用户日报（每人每天一份，推送给用户）
+Layer 1: 对话摘要（每对话对每天一条，AI 分析压缩）
+Layer 0: 原始聊天记录（外部 MySQL，按需回溯）
+```
+
+**5 类洞察提取：**
+
+| 类型 | 说明 | 示例 |
+|------|------|------|
+| 待办事项 | 对话中的任务分配和工作请求 | "帮我看一下登录Bug" |
+| 重要决策 | 双方达成一致的结论 | "就用方案B吧" |
+| 关键时间节点 | 提到的截止日期 | "周五前提测" |
+| 未回复检测 | 工作问题未得到回应 | 问了接口文档位置没回复 |
+| 工作总结 | 对话核心内容概要 | 今日主要讨论了上线计划 |
+
+**待办生命周期管理：**
+
+```
+open → completed（对话中确认完成）
+open → expired（超期未完成）→ reminded（日报提醒）
+reminded → completed / ignored / open（用户回复操作）
+```
+
+**使用方式：**
+
+```bash
+php artisan chat:analyze-daily                     # 分析昨天的聊天记录
+php artisan chat:analyze-daily --date=2026-03-15   # 分析指定日期
+php artisan chat:analyze-daily --backfill          # 冷启动，回溯分析近 N 天
+php artisan chat:push-reports                      # 推送日报给员工
+php artisan chat:push-reports --force              # 强制推送（忽略推送日限制）
+```
 
 ## 环境要求
 
 - PHP >= 8.2
 - Composer
-- SQLite（默认）或 MySQL
+- MySQL
 - AI 模型（任选其一）：
   - [Ollama](https://ollama.ai) 本地部署（推荐开发环境，默认 qwen3:8b）
   - Claude API Key（[Anthropic](https://console.anthropic.com)）
@@ -62,7 +114,6 @@ cd wecom-mcp
 composer install
 cp .env.example .env
 php artisan key:generate
-touch database/database.sqlite
 php artisan migrate
 ```
 
@@ -104,13 +155,32 @@ WECOM_AGENT_AES_KEY=your_callback_aes_key
 WECOM_CONTACT_SECRET=your_contact_secret
 ```
 
-### 4. 同步通讯录
+### 4. 配置聊天分析（可选）
+
+如果需要使用聊天记录智能分析功能，配置外部聊天记录数据库连接：
 
 ```bash
-php artisan wecom:sync-contacts
+CHAT_RECORDS_DB_HOST=127.0.0.1
+CHAT_RECORDS_DB_PORT=3306
+CHAT_RECORDS_DB_DATABASE=chat_records
+CHAT_RECORDS_DB_USERNAME=root
+CHAT_RECORDS_DB_PASSWORD=
 ```
 
-### 5. 开始对话
+初始化分析配置：
+
+```bash
+php artisan db:seed --class=ChatAnalysisConfigSeeder
+```
+
+### 5. 同步通讯录
+
+```bash
+php artisan wecom:sync-contacts              # 同步内部通讯录
+php artisan wecom:sync-external-contacts     # 同步外部联系人
+```
+
+### 6. 开始对话
 
 ```bash
 php artisan chat
@@ -143,6 +213,11 @@ AI: 我来帮你创建会议。先搜索一下"张三"...
                     +-------+-------+
                     |       |       |
                   Ollama  Claude  OpenAI ...
+
++-----------------------------------------------------+
+|              聊天记录智能分析（异步）                   |
+|  外部 MySQL → 采集 → AI 分析 → 洞察管理 → 日报推送    |
++-----------------------------------------------------+
 ```
 
 **核心设计原则：**
@@ -150,6 +225,9 @@ AI: 我来帮你创建会议。先搜索一下"张三"...
 - **Tool 参数隔离** — Tool 只暴露业务参数（title、start_time），access_token、corp_id 等基础设施参数由 Service 层内部管理，LLM 不可见
 - **AI 驱动抽象** — Manager 模式，内部统一为 Claude 风格消息格式，Driver 负责格式转换
 - **拼音四级匹配** — 精确 → 拼音全匹配 → 首字母 → 模糊，多候选时 AI 自动追问
+- **个性化 Profile** — 自定义 AI 身份和交互风格，`enter_chat` 事件触发欢迎语
+- **定时任务双机制** — 一次性任务用 Queue `dispatch()->delay()`，周期性任务用 Scheduler 每分钟检查
+- **分层知识架构** — 聊天分析采用 L0→L1→L2 三层压缩，后续分析优先读压缩层，控制 token 消耗
 
 ## 项目结构
 
@@ -162,15 +240,28 @@ app/
 │   └── AiManager.php           # Laravel Manager 工厂
 ├── Mcp/
 │   ├── Servers/WecomServer.php # MCP Server 入口
-│   └── Tools/                  # 23 个 MCP Tool
-├── Models/                     # Contact, RecentMeeting, UserMemory
+│   └── Tools/                  # 31 个 MCP Tool
+├── Models/                     # Eloquent 模型
 ├── Services/
 │   ├── ChatService.php         # AI 对话编排（tool 循环）
-│   ├── ContactsService.php     # 拼音四级匹配
-│   └── WecomService.php        # 企微 API 封装
+│   ├── ContactsService.php     # 内部联系人拼音匹配
+│   ├── ExternalContactService.php # 外部联系人管理
+│   ├── UserProfileService.php  # 用户个性化 Profile
+│   ├── ScheduledTaskService.php # 定时任务调度
+│   └── ChatAnalysis/           # 聊天记录智能分析
+│       ├── ChatAnalysisService.php    # 主编排器
+│       ├── MessageCollector.php       # 消息采集
+│       ├── ConversationAnalyzer.php   # Phase 1 对话级 AI 分析
+│       ├── ReportGenerator.php        # Phase 2 日报生成
+│       ├── InsightManager.php         # 洞察生命周期管理
+│       └── AnalysisConfigService.php  # 配置管理
+├── Wecom/                      # 企微 API 客户端
+├── Jobs/                       # Queue Jobs
 └── Console/Commands/           # CLI 命令
 config/ai.php                   # AI 驱动配置
+config/database.php             # 数据库配置（含外部聊天记录库）
 skills/                         # Claude Code Skills
+docs/                           # 设计文档
 ```
 
 ## 常用命令
@@ -178,7 +269,10 @@ skills/                         # Claude Code Skills
 ```bash
 php artisan chat                      # 交互式对话
 php artisan test                      # 运行测试
-php artisan wecom:sync-contacts       # 同步企微通讯录
+php artisan wecom:sync-contacts       # 同步内部通讯录
+php artisan wecom:sync-external-contacts  # 同步外部联系人
+php artisan chat:analyze-daily        # 分析昨日聊天记录
+php artisan chat:push-reports         # 推送日报
 php artisan mcp:start wecom           # 启动 MCP Server
 
 # 切换 AI 驱动
@@ -196,9 +290,9 @@ AI_DRIVER=deepseek php artisan chat
 ## 开发路线图
 
 - [x] **第一期：MVP** — MCP Server + Tool + AI 驱动抽象层 + CLI 对话
-- [ ] **第二期：接入企微** — 回调接口、异步队列、多轮对话上下文（进行中）
-- [ ] **第三期：功能扩展** — 智能排期、部门级邀请、用户偏好挖掘
-- [ ] **第四期：架构升级** — MCP HTTP 模式部署、接入 Claude Desktop
+- [x] **第二期：接入企微** — 回调接口、异步队列、多轮对话上下文
+- [x] **第三期：功能扩展** — 外部联系人管理、聊天记录智能分析
+- [ ] **第四期：架构升级** — MCP HTTP 模式部署、接入 Claude Desktop、周报/月报
 
 ## 技术栈
 
