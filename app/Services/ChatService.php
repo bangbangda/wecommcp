@@ -114,6 +114,12 @@ class ChatService
 - 需要先确定联系人身份：如果用户提供了姓名，可以直接传 contact_name 让工具内部搜索，也可以先用 search_contacts 或 search_external_contacts 获取 userid 后传入 contact_userid
 - 默认分析最近 7 天，用户可指定时间范围
 - 当前用户的 userid 通过系统上下文获取，传入 userid 参数
+
+### 汇报分析
+- 当领导想查看团队汇报情况时，使用 analyze_team_journals 分析汇报内容（工作概要、关注事项、质量评估、管理建议）
+- 当领导想知道谁没交汇报时，使用 query_journal_stats 查看提交统计
+- 支持按汇报类型筛选：daily=日报, weekly=周报, monthly=月报
+- 系统通过汇报接收人关系自动识别团队成员，无需手动配置
 {$profileGuide}
 ## 注意事项
 - 时间转换为 ISO 8601 格式（如 2026-02-26T15:00:00）
@@ -187,6 +193,14 @@ class ChatService
 用户: "我应该怎么跟进和李四的合作"
 → 调用 analyze_chat_with_contact(userid=当前用户, contact_name="李四")
 → 重点关注分析结果中的跟进建议部分
+
+用户: "帮我看看团队这周的日报"
+→ 调用 analyze_team_journals(userid=当前用户, report_type="daily")
+→ 返回团队汇报分析（工作概要、关注事项、质量评估）
+
+用户: "谁还没交周报"
+→ 调用 query_journal_stats(userid=当前用户, report_type="weekly")
+→ 返回已提交/未提交列表和提交率
 PROMPT;
     }
 

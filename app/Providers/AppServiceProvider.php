@@ -9,6 +9,7 @@ use App\Wecom\WecomContactClient;
 use App\Wecom\WecomDocumentClient;
 use App\Wecom\WecomExternalContactClient;
 use App\Wecom\WecomGroupChatClient;
+use App\Wecom\WecomJournalClient;
 use App\Wecom\WecomManager;
 use App\Wecom\WecomMeetingClient;
 use App\Wecom\WecomMeetingRoomClient;
@@ -65,6 +66,10 @@ class AppServiceProvider extends ServiceProvider
         ));
 
         $this->app->singleton(WecomDocumentClient::class, fn ($app) => new WecomDocumentClient(
+            manager: $app->make(WecomManager::class),
+        ));
+
+        $this->app->singleton(WecomJournalClient::class, fn ($app) => new WecomJournalClient(
             manager: $app->make(WecomManager::class),
         ));
     }
