@@ -162,7 +162,7 @@ class JournalService
     {
         // 特殊模板使用富文本字段
         if (! empty($detail['sys_journal_data'])) {
-            return strip_tags($detail['sys_journal_data']);
+            return $this->cleanHtml($detail['sys_journal_data']);
         }
 
         $contents = $detail['apply_data']['contents'] ?? [];
@@ -209,7 +209,7 @@ class JournalService
         $value = $item['value'] ?? [];
 
         return match ($control) {
-            'Text', 'Textarea' => $value['text'] ?? '',
+            'Text', 'Textarea' => $this->cleanHtml($value['text'] ?? ''),
             'Number' => $value['new_number'] ?? '',
             'Money' => $value['new_money'] ?? '',
             'Date' => $this->formatDate($value['date'] ?? []),
@@ -224,6 +224,23 @@ class JournalService
             'Doc' => $this->formatDocs($value['docs'] ?? []),
             default => '',
         };
+    }
+
+    /**
+     * 清理 HTML 标签，转为干净的纯文本
+     * 将 div/br/p 转换为换行，去除其余标签
+     */
+    private function cleanHtml(string $text): string
+    {
+        // 将块级标签和 br 转为换行
+        $text = preg_replace('/<br\s*\/?>/i', "\n", $text);
+        $text = preg_replace('/<\/(div|p|li)>/i', "\n", $text);
+        // 去除剩余标签
+        $text = strip_tags($text);
+        // 清理多余空行
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+
+        return trim($text);
     }
 
     /**
