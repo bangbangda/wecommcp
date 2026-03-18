@@ -52,6 +52,13 @@
 | | CreateRecurringTaskTool | 创建周期性定时任务（每天/工作日/每周/每月） |
 | | QueryScheduledTasksTool | 查询定时任务列表 |
 | | CancelScheduledTaskTool | 取消定时任务 |
+| 文档 | CreateDocumentTool | 创建在线文档/表格/智能表格 |
+| | GetDocumentInfoTool | 获取文档基础信息 |
+| | ShareDocumentTool | 获取文档分享链接 |
+| | RenameDocumentTool | 重命名文档 |
+| | DeleteDocumentTool | 删除文档 |
+| | GetDocumentContentTool | 读取文档内容（提取为纯文本） |
+| | UpdateDocumentContentTool | 编辑文档内容（追加/替换/插入） |
 
 ## 聊天记录智能分析
 
@@ -240,7 +247,7 @@ app/
 │   └── AiManager.php           # Laravel Manager 工厂
 ├── Mcp/
 │   ├── Servers/WecomServer.php # MCP Server 入口
-│   └── Tools/                  # 31 个 MCP Tool
+│   └── Tools/                  # 38 个 MCP Tool
 ├── Models/                     # Eloquent 模型
 ├── Services/
 │   ├── ChatService.php         # AI 对话编排（tool 循环）

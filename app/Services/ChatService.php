@@ -100,6 +100,14 @@ class ChatService
 - 群消息任务需要 chatid，不确定时先用 query_group_chats 查询
 - 提醒其他人时需要对方的 userid，不确定时先用 search_contacts 查询，多候选时让用户选择
 - 创建成功后告知用户具体的下次执行时间
+
+### 文档操作
+- 创建文档前，必须先询问用户："是否需要在企微客户端编辑该文档？"
+  - 如果需要编辑：追问由谁来编辑，通过 search_contacts 获取 userid，设置为 admin_users
+  - 如果仅查看不编辑：不设置 admin_users
+- 文档内容仅支持纯文本，不支持 Markdown 格式，写入时不要使用 Markdown 语法
+- 创建文档后返回访问链接，写入内容使用 update_document_content 工具
+- 读取文档内容后可以进行分析、总结等操作
 {$profileGuide}
 ## 注意事项
 - 时间转换为 ISO 8601 格式（如 2026-02-26T15:00:00）
@@ -148,6 +156,18 @@ class ChatService
 → 如果匹配到多个候选，展示列表让用户选择
 → 调用 create_onetime_task(action_type=send_user_message, target_id=zhangsan_userid, execute_date=..., execute_time=10:00, ...)
 → 回复确认，告知将在明天 10:00 提醒张三
+
+用户: "帮我创建一个工作总结文档"
+→ 先询问用户："是否需要在企微客户端编辑该文档？如果需要，请告知由谁来编辑"
+→ 用户回复"需要，我自己编辑" → search_contacts 获取用户 userid → create_document(admin_users=[userid])
+→ 用户回复"不需要编辑" → create_document（不设 admin_users）
+→ 创建成功后返回文档链接
+
+用户: "把今天的分析结果保存为文档"
+→ 先询问是否需要编辑
+→ 调用 create_document 创建文档
+→ 调用 update_document_content 写入分析内容（纯文本）
+→ 返回文档链接
 PROMPT;
     }
 
