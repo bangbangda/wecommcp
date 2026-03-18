@@ -3,6 +3,8 @@
 namespace App\Mcp;
 
 use App\Mcp\Tools\Analysis\AnalyzeChatWithContactTool;
+use App\Mcp\Tools\Analysis\AnalyzeTeamJournalsTool;
+use App\Mcp\Tools\Analysis\QueryJournalStatsTool;
 use App\Mcp\Tools\Contact\SearchContactsTool;
 use App\Mcp\Tools\Document\CreateDocumentTool;
 use App\Mcp\Tools\Document\DeleteDocumentTool;
@@ -82,6 +84,8 @@ class ToolRegistry
         'query_scheduled_tasks' => null,
         'cancel_scheduled_task' => null,
         'analyze_chat_with_contact' => null,
+        'analyze_team_journals' => null,
+        'query_journal_stats' => null,
         'create_document' => null,
         'get_document_info' => null,
         'share_document' => null,
@@ -125,6 +129,8 @@ class ToolRegistry
         SearchExternalContactsTool::class,
         ListExternalContactsTool::class,
         AnalyzeChatWithContactTool::class,
+        AnalyzeTeamJournalsTool::class,
+        QueryJournalStatsTool::class,
         CreateDocumentTool::class,
         GetDocumentInfoTool::class,
         ShareDocumentTool::class,
