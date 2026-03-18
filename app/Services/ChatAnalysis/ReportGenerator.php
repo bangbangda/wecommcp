@@ -99,7 +99,8 @@ class ReportGenerator
 - 只展示有内容的板块，没有内容的板块完全不要出现
 - 待办事项按优先级排序（high > medium > low）
 - 临近截止日期的事项需要重点标注
-- 超期提醒板块需要附带操作指引
+- 超期提醒板块必须使用数据中提供的具体天数和日期，严禁使用 N天、M/D 等占位符
+- 超期提醒板块的序号和操作指引必须照搬数据中的内容，不要自行编号
 - 沟通概要板块简要概括当天的主要沟通内容和对象
 - 如果是合并报告（含多天），按天分组概要但洞察合并展示
 
@@ -121,7 +122,7 @@ class ReportGenerator
 1. 某某在HH:MM提出了XX问题
 
 -- 超期提醒 --
-1. 事项内容（已超期N天，来自M/D）
+1. 事项内容（已超期3天，来自2026-03-14）
    回复「完成1」标记已完成 | 回复「忽略1」不再跟踪
 
 -- 今日沟通概要 --
@@ -202,10 +203,11 @@ PROMPT;
             $open = $openHistorical->where('status', 'open');
 
             if ($expired->isNotEmpty()) {
-                $parts[] = "\n### 已超期（需要在日报中提醒用户操作）";
-                foreach ($expired as $item) {
+                $parts[] = "\n### 已超期（需要在日报的超期提醒板块中展示，必须使用下方提供的具体天数和日期，不要用占位符）";
+                foreach ($expired as $index => $item) {
                     $days = now()->diffInDays($item->source_date);
-                    $parts[] = "- [#{$item->id}] {$item->content} (已超期{$days}天, 来自{$item->source_date->format('m/d')})";
+                    $seq = $index + 1;
+                    $parts[] = "- 序号{$seq} | ID#{$item->id} | {$item->content} | 已超期{$days}天 | 来自{$item->source_date->format('Y-m-d')} | 操作指引：回复「完成{$seq}」标记已完成，回复「忽略{$seq}」不再跟踪";
                 }
             }
 
