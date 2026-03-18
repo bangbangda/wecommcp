@@ -108,6 +108,12 @@ class ChatService
 - 文档内容仅支持纯文本，不支持 Markdown 格式，写入时不要使用 Markdown 语法
 - 创建文档后返回访问链接，写入内容使用 update_document_content 工具
 - 读取文档内容后可以进行分析、总结等操作
+
+### 数据分析
+- 当用户想了解与某人的沟通情况、总结聊天内容、获取跟进建议时，使用 analyze_chat_with_contact 工具
+- 需要先确定联系人身份：如果用户提供了姓名，可以直接传 contact_name 让工具内部搜索，也可以先用 search_contacts 或 search_external_contacts 获取 userid 后传入 contact_userid
+- 默认分析最近 7 天，用户可指定时间范围
+- 当前用户的 userid 通过系统上下文获取，传入 userid 参数
 {$profileGuide}
 ## 注意事项
 - 时间转换为 ISO 8601 格式（如 2026-02-26T15:00:00）
@@ -168,6 +174,19 @@ class ChatService
 → 调用 create_document 创建文档
 → 调用 update_document_content 写入分析内容（纯文本）
 → 返回文档链接
+
+用户: "我和小王都聊什么了"
+→ 调用 analyze_chat_with_contact(userid=当前用户, contact_name="小王")
+→ 如果匹配到多个候选，展示列表让用户确认
+→ 返回沟通分析报告
+
+用户: "总结一下最近和张总的沟通"
+→ 调用 analyze_chat_with_contact(userid=当前用户, contact_name="张总")
+→ 返回综合分析（概要、话题、待跟进、建议）
+
+用户: "我应该怎么跟进和李四的合作"
+→ 调用 analyze_chat_with_contact(userid=当前用户, contact_name="李四")
+→ 重点关注分析结果中的跟进建议部分
 PROMPT;
     }
 

@@ -38,7 +38,7 @@ test('getToolClasses 返回所有注册的 Tool 类', function () {
 
     $classes = $registry->getToolClasses();
 
-    expect($classes)->toHaveCount(38)
+    expect($classes)->toHaveCount(39)
         ->toContain(CreateMeetingTool::class)
         ->toContain(CancelMeetingTool::class)
         ->toContain(UpdateMeetingTool::class)
@@ -77,7 +77,7 @@ test('getToolMap 返回正确的 name → class 映射', function () {
 
     $map = $registry->getToolMap();
 
-    expect($map)->toHaveCount(38)
+    expect($map)->toHaveCount(39)
         ->toHaveKey('create_meeting', CreateMeetingTool::class)
         ->toHaveKey('cancel_meeting', CancelMeetingTool::class)
         ->toHaveKey('update_meeting', UpdateMeetingTool::class)
@@ -116,7 +116,7 @@ test('getClaudeToolDefinitions 格式正确', function () {
 
     $definitions = $registry->getClaudeToolDefinitions();
 
-    expect($definitions)->toHaveCount(38);
+    expect($definitions)->toHaveCount(39);
 
     // 每个定义包含 name、description、input_schema
     foreach ($definitions as $def) {
