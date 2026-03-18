@@ -2,6 +2,7 @@
 
 namespace App\Mcp;
 
+use App\Mcp\Tools\Analysis\AnalyzeChatWithContactTool;
 use App\Mcp\Tools\Contact\SearchContactsTool;
 use App\Mcp\Tools\Document\CreateDocumentTool;
 use App\Mcp\Tools\Document\DeleteDocumentTool;
@@ -80,6 +81,7 @@ class ToolRegistry
         'create_recurring_task' => null,
         'query_scheduled_tasks' => null,
         'cancel_scheduled_task' => null,
+        'analyze_chat_with_contact' => null,
         'create_document' => null,
         'get_document_info' => null,
         'share_document' => null,
@@ -122,6 +124,7 @@ class ToolRegistry
         CancelScheduledTaskTool::class,
         SearchExternalContactsTool::class,
         ListExternalContactsTool::class,
+        AnalyzeChatWithContactTool::class,
         CreateDocumentTool::class,
         GetDocumentInfoTool::class,
         ShareDocumentTool::class,
