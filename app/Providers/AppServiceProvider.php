@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Ai\AiManager;
 use App\Ai\Contracts\AiDriver;
 use App\Mcp\ToolRegistry;
+use App\Wecom\WecomCheckinClient;
 use App\Wecom\WecomContactClient;
 use App\Wecom\WecomDocumentClient;
 use App\Wecom\WecomExternalContactClient;
@@ -71,6 +72,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(WecomJournalClient::class, fn ($app) => new WecomJournalClient(
             manager: $app->make(WecomManager::class),
+        ));
+
+        $this->app->singleton(WecomCheckinClient::class, fn ($app) => new WecomCheckinClient(
+            app: $app->make(WecomManager::class)->app('agent'),
         ));
     }
 
