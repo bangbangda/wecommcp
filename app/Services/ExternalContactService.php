@@ -55,9 +55,12 @@ class ExternalContactService
         return ['contacts' => $totalContacts, 'relations' => $totalRelations];
     }
 
+    /** @var int 批量 upsert 每批条数 */
+    private const UPSERT_BATCH_SIZE = 200;
+
     /**
      * 批量同步指定员工列表的外部联系人
-     * 使用 batchGetByUser 接口，支持分页
+     * 使用 batchGetByUser 接口 + upsert 批量写库
      *
      * @param  array  $useridList  内部员工 userid 列表（最多 100 个）
      * @return array{contacts: int, relations: int} 同步的联系人数和跟进关系数
@@ -66,6 +69,8 @@ class ExternalContactService
     {
         $contactCount = 0;
         $relationCount = 0;
+        $contactBuffer = [];
+        $relationBuffer = [];
         $cursor = '';
 
         do {
@@ -80,76 +85,62 @@ class ExternalContactService
             }
 
             foreach ($response['external_contact_list'] ?? [] as $item) {
-                $this->saveFromBatchResponse($item);
+                $contactData = $item['external_contact'] ?? [];
+                $followInfo = $item['follow_info'] ?? [];
+
+                if (empty($contactData['external_userid'])) {
+                    continue;
+                }
+
+                $contactBuffer[] = $this->buildContactRow($contactData);
                 $contactCount++;
-                $relationCount++;
+
+                if (! empty($followInfo['userid'])) {
+                    $relationBuffer[] = $this->buildRelationRow($contactData['external_userid'], $followInfo);
+                    $relationCount++;
+                }
+
+                // 达到批量大小时刷入数据库
+                if (count($contactBuffer) >= self::UPSERT_BATCH_SIZE) {
+                    $this->flushContacts($contactBuffer);
+                    $contactBuffer = [];
+                }
+                if (count($relationBuffer) >= self::UPSERT_BATCH_SIZE) {
+                    $this->flushRelations($relationBuffer);
+                    $relationBuffer = [];
+                }
             }
 
             $cursor = $response['next_cursor'] ?? '';
         } while (! empty($cursor));
+
+        // 刷入剩余数据
+        if (! empty($contactBuffer)) {
+            $this->flushContacts($contactBuffer);
+        }
+        if (! empty($relationBuffer)) {
+            $this->flushRelations($relationBuffer);
+        }
 
         return ['contacts' => $contactCount, 'relations' => $relationCount];
     }
 
     /**
      * 同步指定员工的外部联系人
-     * 先获取客户列表，再逐个获取详情
+     * 使用 batchGetByUser 接口（传单个 userid），避免逐条 API 调用
      *
      * @param  string  $userid  内部员工 userid
      * @return int 同步的联系人数量
      */
     public function syncByUser(string $userid): int
     {
-        try {
-            $externalUserids = $this->client->getContactList($userid);
-        } catch (WecomApiException $e) {
-            Log::error("ExternalContactService::syncByUser 获取客户列表失败 [{$userid}]", [
-                'error' => $e->getMessage(),
-            ]);
+        $result = $this->syncByUserBatch([$userid]);
 
-            return 0;
-        }
-
-        $synced = 0;
-
-        foreach ($externalUserids as $externalUserid) {
-            try {
-                $detail = $this->client->getContactDetail($externalUserid);
-                $this->saveFromDetailResponse($detail);
-                $synced++;
-            } catch (WecomApiException $e) {
-                Log::warning("ExternalContactService::syncByUser 获取客户详情失败 [{$externalUserid}]", [
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        return $synced;
+        return $result['contacts'];
     }
 
     /**
-     * 从批量接口响应中保存单条外部联系人及跟进关系
-     *
-     * @param  array  $item  batchGetByUser 返回的单条数据
-     */
-    private function saveFromBatchResponse(array $item): void
-    {
-        $contactData = $item['external_contact'] ?? [];
-        $followInfo = $item['follow_info'] ?? [];
-
-        if (empty($contactData['external_userid'])) {
-            return;
-        }
-
-        $this->saveContactRecord($contactData);
-
-        if (! empty($followInfo['userid'])) {
-            $this->saveFollowRelation($contactData['external_userid'], $followInfo);
-        }
-    }
-
-    /**
-     * 从详情接口响应中保存外部联系人及所有跟进关系
+     * 从详情接口响应中保存外部联系人及所有跟进关系（事件回调用）
      *
      * @param  array  $detail  getContactDetail 返回的完整数据
      */
@@ -162,68 +153,101 @@ class ExternalContactService
             return;
         }
 
-        $this->saveContactRecord($contactData);
+        $this->flushContacts([$this->buildContactRow($contactData)]);
 
+        $relationRows = [];
         foreach ($followUsers as $followUser) {
-            $this->saveFollowRelation($contactData['external_userid'], $followUser);
+            if (! empty($followUser['userid'])) {
+                $relationRows[] = $this->buildRelationRow($contactData['external_userid'], $followUser);
+            }
+        }
+        if (! empty($relationRows)) {
+            $this->flushRelations($relationRows);
         }
     }
 
     /**
-     * 保存/更新外部联系人主表记录
+     * 构建联系人 upsert 行数据
      *
      * @param  array  $data  API 返回的外部联系人数据
+     * @return array 可用于 upsert 的行数据
      */
-    private function saveContactRecord(array $data): void
+    private function buildContactRow(array $data): array
     {
         $pinyin = $this->generatePinyin($data['name'] ?? '');
 
-        ExternalContact::updateOrCreate(
-            ['external_userid' => $data['external_userid']],
-            [
-                'name' => $data['name'] ?? '',
-                'name_pinyin' => $pinyin['pinyin'],
-                'name_initials' => $pinyin['initials'],
-                'avatar' => $data['avatar'] ?? null,
-                'type' => $data['type'] ?? 0,
-                'gender' => $data['gender'] ?? 0,
-                'corp_name' => $data['corp_name'] ?? null,
-                'corp_full_name' => $data['corp_full_name'] ?? null,
-                'position' => $data['position'] ?? null,
-                'unionid' => $data['unionid'] ?? null,
-            ]
-        );
+        return [
+            'external_userid' => $data['external_userid'],
+            'name' => $data['name'] ?? '',
+            'name_pinyin' => $pinyin['pinyin'],
+            'name_initials' => $pinyin['initials'],
+            'avatar' => $data['avatar'] ?? null,
+            'type' => $data['type'] ?? 0,
+            'gender' => $data['gender'] ?? 0,
+            'corp_name' => $data['corp_name'] ?? null,
+            'corp_full_name' => $data['corp_full_name'] ?? null,
+            'position' => $data['position'] ?? null,
+            'unionid' => $data['unionid'] ?? null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
     }
 
     /**
-     * 保存/更新跟进关系记录
+     * 构建跟进关系 upsert 行数据
      *
      * @param  string  $externalUserid  外部联系人 userid
-     * @param  array  $followData  跟进人数据（来自 follow_user 或 follow_info）
+     * @param  array  $followData  跟进人数据
+     * @return array 可用于 upsert 的行数据
      */
-    private function saveFollowRelation(string $externalUserid, array $followData): void
+    private function buildRelationRow(string $externalUserid, array $followData): array
     {
-        $userid = $followData['userid'] ?? '';
-        if (empty($userid)) {
-            return;
-        }
+        return [
+            'external_userid' => $externalUserid,
+            'userid' => $followData['userid'],
+            'remark' => $followData['remark'] ?? null,
+            'description' => $followData['description'] ?? null,
+            'remark_corp_name' => $followData['remark_corp_name'] ?? null,
+            'add_way' => $followData['add_way'] ?? null,
+            'state' => $followData['state'] ?? null,
+            'follow_at' => isset($followData['createtime'])
+                ? \Carbon\Carbon::createFromTimestamp($followData['createtime'])
+                : null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+    }
 
-        ExternalContactFollowUser::updateOrCreate(
-            [
-                'external_userid' => $externalUserid,
-                'userid' => $userid,
-            ],
-            [
-                'remark' => $followData['remark'] ?? null,
-                'description' => $followData['description'] ?? null,
-                'remark_corp_name' => $followData['remark_corp_name'] ?? null,
-                'add_way' => $followData['add_way'] ?? null,
-                'state' => $followData['state'] ?? null,
-                'follow_at' => isset($followData['createtime'])
-                    ? \Carbon\Carbon::createFromTimestamp($followData['createtime'])
-                    : null,
-            ]
+    /**
+     * 批量写入联系人数据（upsert）
+     *
+     * @param  array  $rows  联系人行数据列表
+     */
+    private function flushContacts(array $rows): void
+    {
+        ExternalContact::upsert(
+            $rows,
+            ['external_userid'],
+            ['name', 'name_pinyin', 'name_initials', 'avatar', 'type', 'gender', 'corp_name', 'corp_full_name', 'position', 'unionid', 'updated_at']
         );
+
+        Log::debug('ExternalContactService::flushContacts upsert', ['count' => count($rows)]);
+    }
+
+    /**
+     * 批量写入跟进关系数据（upsert）
+     *
+     * @param  array  $rows  跟进关系行数据列表
+     */
+    private function flushRelations(array $rows): void
+    {
+        ExternalContactFollowUser::upsert(
+            $rows,
+            ['external_userid', 'userid'],
+            ['remark', 'description', 'remark_corp_name', 'add_way', 'state', 'follow_at', 'updated_at']
+        );
+
+        Log::debug('ExternalContactService::flushRelations upsert', ['count' => count($rows)]);
     }
 
     /**
