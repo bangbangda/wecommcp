@@ -140,7 +140,13 @@ class ContactsService
      */
     public function generatePinyin(string $name): array
     {
-        $pinyinCollection = Pinyin::name($name, 'none');
+        // 只保留 CJK 统一汉字和英文字母，去除标点、数字、空格等特殊字符
+        $cleanName = preg_replace('/[^\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{20000}-\x{2a6df}a-zA-Z]/u', '', $name);
+        if (empty($cleanName)) {
+            return ['pinyin' => '', 'initials' => ''];
+        }
+
+        $pinyinCollection = Pinyin::name($cleanName, 'none');
         $pinyinStr = $pinyinCollection->join(' ');
         $initials = $pinyinCollection->map(fn ($p) => mb_substr($p, 0, 1))->join('');
 

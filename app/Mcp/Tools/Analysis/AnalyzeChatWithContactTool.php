@@ -8,6 +8,8 @@ use App\Models\Contact;
 use App\Models\ExternalContact;
 use App\Services\ChatAnalysis\AnalysisConfigService;
 use App\Services\ChatAnalysis\MessageCollector;
+use App\Services\ContactsService;
+use App\Services\ExternalContactService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -110,6 +112,7 @@ class AnalyzeChatWithContactTool extends Tool
 
     /**
      * 解析联系人，返回 userid、姓名和类型（internal/external）
+     * 复用 ContactsService 和 ExternalContactService 的四级匹配策略
      */
     private function resolveContact(?string $contactUserid, ?string $contactName): array
     {
@@ -127,13 +130,13 @@ class AnalyzeChatWithContactTool extends Tool
             return ['status' => 'not_found', 'message' => "未找到 userid 为「{$contactUserid}」的联系人"];
         }
 
-        // 按姓名搜索
+        // 按姓名搜索（使用四级匹配策略：精确→拼音→首字母→模糊）
         if (empty($contactName)) {
             return ['status' => 'not_found', 'message' => '请提供联系人姓名或 userid'];
         }
 
-        $contacts = Contact::where('name', $contactName)->get();
-        $externals = ExternalContact::where('name', $contactName)->get();
+        $contacts = app(ContactsService::class)->searchByName($contactName);
+        $externals = app(ExternalContactService::class)->searchByName($contactName);
 
         $all = collect();
         foreach ($contacts as $c) {
