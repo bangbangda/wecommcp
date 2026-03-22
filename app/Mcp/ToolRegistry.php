@@ -5,6 +5,9 @@ namespace App\Mcp;
 use App\Mcp\Tools\Analysis\AnalyzeChatWithContactTool;
 use App\Mcp\Tools\Analysis\AnalyzeTeamJournalsTool;
 use App\Mcp\Tools\Analysis\QueryJournalStatsTool;
+use App\Mcp\Tools\Checkin\GetCheckinAnomalyTool;
+use App\Mcp\Tools\Checkin\GetCheckinDayReportTool;
+use App\Mcp\Tools\Checkin\GetCheckinMonthReportTool;
 use App\Mcp\Tools\Contact\SearchContactsTool;
 use App\Mcp\Tools\Document\CreateDocumentTool;
 use App\Mcp\Tools\Document\DeleteDocumentTool;
@@ -93,6 +96,9 @@ class ToolRegistry
         'delete_document' => null,
         'get_document_content' => null,
         'update_document_content' => null,
+        'get_checkin_day_report' => 'checkin',
+        'get_checkin_month_report' => 'checkin',
+        'get_checkin_anomaly' => 'checkin',
     ];
 
     /** @var array<int, class-string<\Laravel\Mcp\Server\Tool>> 注册的 Tool 类列表 */
@@ -138,6 +144,9 @@ class ToolRegistry
         DeleteDocumentTool::class,
         GetDocumentContentTool::class,
         UpdateDocumentContentTool::class,
+        GetCheckinDayReportTool::class,
+        GetCheckinMonthReportTool::class,
+        GetCheckinAnomalyTool::class,
     ];
 
     /**
