@@ -15,7 +15,7 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 
 #[Name('analyze_team_journals')]
-#[Description('分析团队汇报内容，面向部门领导。自动获取发送给当前用户的所有下属汇报，AI 分析后生成团队工作概要、重点关注事项、汇报质量评估和管理建议。典型场景："帮我看看团队这周的日报""大家最近的汇报内容怎么样""团队有什么需要我关注的""看看本周的周报情况"。')]
+#[Description('分析团队汇报内容，生成工作概要、重点关注事项和管理建议。面向部门领导，自动获取发送给当前用户的所有下属汇报进行 AI 分析。支持按汇报类型筛选（daily=日报, weekly=周报, monthly=月报），不传则分析所有类型。典型场景："帮我看看团队这周的日报""大家最近的汇报怎么样""团队有什么需要我关注的"。此工具分析汇报内容，如需查看提交统计（谁交了、谁没交），请使用 query_journal_stats。仅分析发送给当前用户的汇报，不能查看其他领导收到的汇报。')]
 class AnalyzeTeamJournalsTool extends Tool
 {
     public function schema(JsonSchema $schema): array

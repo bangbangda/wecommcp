@@ -14,7 +14,7 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 
 #[Name('query_journal_stats')]
-#[Description('查询团队汇报提交统计。查看谁已提交、谁未提交、提交率等。面向部门领导，基于汇报接收人关系自动识别团队成员。典型场景："谁还没交日报""这周的汇报提交情况""看看团队的汇报统计"。')]
+#[Description('查询团队汇报提交统计：谁已提交、谁未提交、提交率。面向部门领导，通过汇报接收人关系自动识别团队成员。需要指定汇报类型（daily=日报, weekly=周报, monthly=月报），不传默认查日报。典型场景："谁还没交日报""这周的周报提交情况""看看团队的汇报统计"。此工具只返回提交统计数据，如需 AI 分析汇报内容（工作概要、管理建议），请使用 analyze_team_journals。')]
 class QueryJournalStatsTool extends Tool
 {
     public function schema(JsonSchema $schema): array

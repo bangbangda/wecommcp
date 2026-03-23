@@ -53,6 +53,47 @@ class MessageCollector
     }
 
     /**
+     * 采集指定日期指定用户参与的所有消息（单聊 + 群聊）
+     * 用于实时工作总结，不再过滤 room_id
+     *
+     * @param  string  $date  日期（Y-m-d）
+     * @param  string  $userid  用户 userid
+     * @return Collection 原始消息集合
+     */
+    public function collectByDateForUser(string $date, string $userid): Collection
+    {
+        $startMs = Carbon::parse($date, 'Asia/Shanghai')->startOfDay()->getTimestampMs();
+        $endMs = Carbon::parse($date, 'Asia/Shanghai')->endOfDay()->getTimestampMs();
+
+        Log::info('MessageCollector::collectByDateForUser 开始采集', [
+            'date' => $date,
+            'userid' => $userid,
+            'start_ms' => $startMs,
+            'end_ms' => $endMs,
+        ]);
+
+        $records = ChatRecord::where('type', 'text')
+            ->where('action', 'send')
+            ->where('send_time', '>=', $startMs)
+            ->where('send_time', '<', $endMs)
+            ->where('from', 'not like', 'wb%')  // 排除机器人
+            ->where(function ($query) use ($userid) {
+                $query->where('from', $userid)
+                    ->orWhereJsonContains('to', $userid);
+            })
+            ->orderBy('send_time')
+            ->get();
+
+        Log::info('MessageCollector::collectByDateForUser 采集完成', [
+            'date' => $date,
+            'userid' => $userid,
+            'count' => $records->count(),
+        ]);
+
+        return $records;
+    }
+
+    /**
      * 将消息按对话对（A↔B）分组
      * 对话对的 key 按字母序排列，确保 A↔B 和 B↔A 归入同一组
      *

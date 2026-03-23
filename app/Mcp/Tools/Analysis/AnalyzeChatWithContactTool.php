@@ -21,7 +21,7 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 
 #[Name('analyze_chat_with_contact')]
-#[Description('分析当前用户与指定联系人的聊天内容。自动识别对方身份（内部同事或外部客户），采用不同的分析视角。外部客户：关注购买意向、客户需求、跟进时机、销售机会；内部同事：关注工作协作、待跟进事项、决策进展。典型场景："我和小王都聊什么了""总结我和张总的聊天内容""我应该如何跟进和李四的联系""分析我和客户王总最近的沟通"。需要传入当前用户 userid，联系人可传姓名或 userid。')]
+#[Description('分析当前用户与指定联系人的一对一聊天内容，生成沟通概要和跟进建议。自动识别联系人身份（内部同事/外部客户），采用不同分析视角。联系人可传姓名（自动搜索匹配）或直接传 userid；如之前已通过 search_contacts 或 search_external_contacts 获取到 userid，可直接传入 contact_userid 跳过搜索。典型场景："总结我和张总的聊天""分析我和客户王总最近的沟通""我应该怎么跟进和李四的联系"。仅分析一对一聊天记录，不适用于群聊分析或工作日总结（工作总结请使用 get_daily_work_summary）。')]
 class AnalyzeChatWithContactTool extends Tool
 {
     public function schema(JsonSchema $schema): array
