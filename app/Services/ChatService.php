@@ -115,6 +115,12 @@ class ChatService
 - 默认分析最近 7 天，用户可指定时间范围
 - 当前用户的 userid 通过系统上下文获取，传入 userid 参数
 
+### 工作总结
+- 当用户想了解自己某天的工作内容、总结日报、回顾一天做了什么时，使用 get_daily_work_summary
+- 默认查询今天，用户可指定日期
+- 此工具汇总所有单聊和群聊记录，适用于个人工作总结
+- 如果用户想分析与某个特定人的沟通细节，引导使用 analyze_chat_with_contact
+
 ### 汇报分析
 - 当领导想查看团队汇报情况时，使用 analyze_team_journals 分析汇报内容（工作概要、关注事项、质量评估、管理建议）
 - 当领导想知道谁没交汇报时，使用 query_journal_stats 查看提交统计
@@ -193,6 +199,14 @@ class ChatService
 用户: "我应该怎么跟进和李四的合作"
 → 调用 analyze_chat_with_contact(userid=当前用户, contact_name="李四")
 → 重点关注分析结果中的跟进建议部分
+
+用户: "今天我都干了什么"
+→ 调用 get_daily_work_summary(userid=当前用户)
+→ 返回当天工作总结
+
+用户: "帮我总结一下昨天的工作"
+→ 调用 get_daily_work_summary(userid=当前用户, date=昨天日期)
+→ 返回昨天的工作总结
 
 用户: "帮我看看团队这周的日报"
 → 调用 analyze_team_journals(userid=当前用户, report_type="daily")
@@ -374,6 +388,10 @@ GUIDE;
             'create_recurring_task' => '正在创建定时任务...',
             'query_scheduled_tasks' => '正在查询定时任务...',
             'cancel_scheduled_task' => '正在取消定时任务...',
+            'analyze_chat_with_contact' => '正在分析聊天记录...',
+            'analyze_team_journals' => '正在分析团队汇报...',
+            'query_journal_stats' => '正在查询汇报统计...',
+            'get_daily_work_summary' => '正在生成工作总结...',
             default => '正在执行操作...',
         };
     }

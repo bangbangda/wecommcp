@@ -4,6 +4,7 @@ namespace App\Mcp;
 
 use App\Mcp\Tools\Analysis\AnalyzeChatWithContactTool;
 use App\Mcp\Tools\Analysis\AnalyzeTeamJournalsTool;
+use App\Mcp\Tools\Analysis\GetDailyWorkSummaryTool;
 use App\Mcp\Tools\Analysis\QueryJournalStatsTool;
 use App\Mcp\Tools\Checkin\GetCheckinAnomalyTool;
 use App\Mcp\Tools\Checkin\GetCheckinDayReportTool;
@@ -89,6 +90,7 @@ class ToolRegistry
         'analyze_chat_with_contact' => null,
         'analyze_team_journals' => null,
         'query_journal_stats' => null,
+        'get_daily_work_summary' => null,
         'create_document' => null,
         'get_document_info' => null,
         'share_document' => null,
@@ -137,6 +139,7 @@ class ToolRegistry
         AnalyzeChatWithContactTool::class,
         AnalyzeTeamJournalsTool::class,
         QueryJournalStatsTool::class,
+        GetDailyWorkSummaryTool::class,
         CreateDocumentTool::class,
         GetDocumentInfoTool::class,
         ShareDocumentTool::class,
