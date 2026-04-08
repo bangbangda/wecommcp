@@ -13,7 +13,6 @@ php artisan chat                    # 交互式对话测试
 php artisan test                    # 运行测试（Pest）
 php artisan mcp:start wecom         # 启动 MCP Server
 AI_DRIVER=anthropic php artisan chat  # 切换 Claude 驱动
-php artisan skill:search-doc <关键词>  # 搜索企微 API 文档（skill 专用）
 ```
 
 ## 项目结构
@@ -62,19 +61,11 @@ Tool schema 只暴露业务参数（title、start_time、invitees）。基础设
 - 测试使用 Pest 语法
 - 所有方法必须编写注释（方法用途、参数、返回值）
 - 对接第三方 API 的请求参数和返回值必须记录日志（`Log::debug`），便于问题排查
-- 编写企微 API 对接代码前，**必须先用 `php artisan skill:search-doc` 查阅官方文档**，逐一核对请求参数和返回字段，严禁凭经验臆测参数
+- 编写企微 API 对接代码前，**必须先通过 context-cn MCP 查阅官方文档**，逐一核对请求参数和返回字段，严禁凭经验臆测参数
 
 ### Tool Description 与 System Prompt
 
 Tool 的 `#[Description]` 是大模型选择工具的首要依据，必须包含：功能说明、触发场景（含口语化泛化示例）、工具间调用链依赖、边界说明。System Prompt（`ChatService::buildSystemPrompt()`）引导 AI 的链式推理和交互方式：模糊指令时主动分解任务、多步工具调用、让用户「选择」而非「描述」。详见 **[提示词编写规范](docs/prompt-guide.md)**。
-
-## Skill 开发规范
-
-设计和创建 Skill 时，额外读取 `skills/CLAUDE.md`
-
-### 企微 API 文档查询
-
-需要查阅企业微信 API 文档时，**必须使用 `php artisan skill:search-doc` 命令**从本地数据库查询，不要访问官方网站。详见 [wecom-api-docs-lookup](skills/wecom-api-docs-lookup/SKILL.md)。
 
 ## 文档
 
